@@ -184,18 +184,18 @@ async function render(){
 }
 
 // ---- 1. TASKS ----
+let taskFilterValue='all';
 async function renderTasks(el){
   const tasks=await loadFromDB('tasks');
   el.innerHTML=`<h2><span class="section-icon">►</span> TASKS</h2>
     <div class="toolbar">
       <button onclick="addTask()">+ New Task</button>
-      <select id="taskFilter" onchange="render()" style="width:auto">
-        <option value="all">All</option><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="done">Done</option>
+      <select id="taskFilter" onchange="taskFilterValue=this.value;render()" style="width:auto">
+        <option value="all"${taskFilterValue==='all'?' selected':''}>All</option><option value="pending"${taskFilterValue==='pending'?' selected':''}>Pending</option><option value="in-progress"${taskFilterValue==='in-progress'?' selected':''}>In Progress</option><option value="done"${taskFilterValue==='done'?' selected':''}>Done</option>
       </select>
     </div>
     <div id="taskList"></div>`;
-  const f=document.getElementById('taskFilter');
-  const filtered=tasks.filter(t=>f.value==='all'||t.status===f.value);
+  const filtered=tasks.filter(t=>taskFilterValue==='all'||t.status===taskFilterValue);
   document.getElementById('taskList').innerHTML=filtered.length?filtered.map(t=>`
     <div class="card" style="display:flex;justify-content:space-between;align-items:center">
       <div>
@@ -350,17 +350,17 @@ async function viewDoc(id){
 }
 
 // ---- 5. CONTENT ----
+let contentFilterValue='all';
 async function renderContent(el){
   const items=await loadFromDB('content');
   el.innerHTML=`<h2><span class="section-icon">▶</span> CONTENT TRACKER</h2>
     <div class="toolbar">
       <button onclick="addContent()">+ New Script</button>
-      <select id="contentFilter" onchange="render()" style="width:auto">
-        <option value="all">All</option><option value="draft">Draft</option><option value="review">Review</option><option value="published">Published</option>
+      <select id="contentFilter" onchange="contentFilterValue=this.value;render()" style="width:auto">
+        <option value="all"${contentFilterValue==='all'?' selected':''}>All</option><option value="draft"${contentFilterValue==='draft'?' selected':''}>Draft</option><option value="review"${contentFilterValue==='review'?' selected':''}>Review</option><option value="published"${contentFilterValue==='published'?' selected':''}>Published</option>
       </select>
     </div><div id="contentList"></div>`;
-  const f=document.getElementById('contentFilter');
-  const filtered=items.filter(i=>f.value==='all'||i.status===f.value);
+  const filtered=items.filter(i=>contentFilterValue==='all'||i.status===contentFilterValue);
   document.getElementById('contentList').innerHTML=filtered.length?filtered.map(i=>`
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
