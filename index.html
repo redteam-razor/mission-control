@@ -108,18 +108,16 @@ function drawMatrix(){
 }
 setInterval(drawMatrix,50);
 
-// ---- Neon Database ----
-const DATABASE_URL='postgresql://mission_control_owner:npg_Wf1lkqJe0XAz@ep-steep-forest-a2i2mt3u-pooler.eu-central-1.aws.neon.tech/mission_control?sslmode=require';
-
+// ---- Neon Database (via API proxy) ----
 async function neonQuery(sql, params=[]){
-  const resp=await fetch('https://ep-steep-forest-a2i2mt3u-pooler.eu-central-1.aws.neon.tech/sql',{
+  const resp=await fetch('/api/db',{
     method:'POST',
-    headers:{'Content-Type':'application/json','Neon-Connection-String':DATABASE_URL},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({query:sql,params})
   });
   const data=await resp.json();
-  if(data.error) console.error('Neon error:',data.error);
-  return data;
+  if(!resp.ok) throw new Error(data.error||'Database query failed');
+  return data.rows;
 }
 
 // In-memory cache
@@ -135,7 +133,7 @@ async function initDB(){
 
 async function seedIfEmpty(){
   const r=await neonQuery('SELECT count(*) as c FROM tasks');
-  const count=parseInt(r.rows?.[0]?.c||r.rows?.[0]?.[0]||'0');
+  const count=parseInt(r[0]?.c||'0');
   if(count>0) return;
 
   const tasks=[
@@ -164,13 +162,9 @@ async function seedIfEmpty(){
 
 async function loadFromDB(table){
   const map={tasks:'tasks',calendar:'calendar_entries',prompts:'prompts',documents:'documents',content:'content_items'};
-  const r=await neonQuery(`SELECT * FROM ${map[table]} ORDER BY ${table==='calendar'?'"date"':'created'} ${table==='calendar'?'ASC':'DESC'}`);
-  const rows=(r.rows||[]).map(row=>{
-    if(r.fields){const obj={};r.fields.forEach((f,i)=>obj[f.name]=row[i]);return obj}
-    return row;
-  });
-  cache[table]=rows;
-  return rows;
+  const rows=await neonQuery(`SELECT * FROM ${map[table]} ORDER BY ${table==='calendar'?'"date"':'created'} ${table==='calendar'?'ASC':'DESC'}`);
+  cache[table]=rows||[];
+  return cache[table];
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
