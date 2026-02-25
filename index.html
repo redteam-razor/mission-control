@@ -7,25 +7,23 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--green:#00ff41;--dark-green:#008f11;--bg:#0a0a0a;--panel:#0d1117;--border:#1a3a1a;--dim:#4a7a4a;--glow:0 0 10px rgba(0,255,65,.3)}
-body{font-family:'Courier New',monospace;background:var(--bg);color:var(--green);height:100vh;overflow:hidden}
+body{font-family:'Courier New',monospace;background:var(--bg);color:var(--green);height:100vh;overflow:hidden;font-size:.85rem}
 canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.06}
 #app{position:relative;z-index:1;display:flex;height:100vh}
-/* Main content */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-#header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;background:rgba(10,10,10,.85);backdrop-filter:blur(8px)}
+#header{padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.85);backdrop-filter:blur(8px)}
 #header h1{font-size:1.4rem;text-shadow:var(--glow);letter-spacing:2px}
-#header .subtitle{color:var(--dim);font-size:.75rem}
+#header .subtitle{color:var(--dim);font-size:.7rem;max-width:600px;line-height:1.5;margin-top:6px}
 #content{flex:1;overflow-y:auto;padding:24px;background:rgba(10,10,10,.7)}
 #content::-webkit-scrollbar{width:6px}
 #content::-webkit-scrollbar-thumb{background:var(--dark-green);border-radius:3px}
-/* Right sidebar tabs */
-#sidebar{width:64px;background:rgba(13,17,23,.9);border-left:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px;backdrop-filter:blur(8px)}
-.tab-btn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:none;background:transparent;color:var(--dim);cursor:pointer;border-radius:8px;transition:all .2s}
+/* LEFT sidebar */
+#sidebar{width:72px;background:rgba(13,17,23,.9);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px;backdrop-filter:blur(8px);order:-1}
+.tab-btn{width:56px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:none;background:transparent;color:var(--dim);cursor:pointer;border-radius:6px;transition:all .2s;gap:3px}
 .tab-btn:hover{background:rgba(0,255,65,.08);color:var(--green)}
 .tab-btn.active{background:rgba(0,255,65,.12);color:var(--green);box-shadow:var(--glow)}
-.tab-label{font-size:.55rem;color:var(--dim);margin-top:1px;font-family:'Courier New',monospace}
-.tab-btn.active .tab-label{color:var(--green)}
-/* Shared UI */
+.tab-icon{font-size:.85rem;font-family:'Courier New',monospace;font-weight:bold;color:inherit}
+.tab-label{font-size:.65rem;color:inherit;font-family:'Courier New',monospace}
 button,.btn{background:transparent;color:var(--green);border:1px solid var(--dark-green);padding:8px 16px;font-family:inherit;font-size:.8rem;cursor:pointer;border-radius:4px;transition:all .2s}
 button:hover,.btn:hover{background:rgba(0,255,65,.15);box-shadow:var(--glow)}
 input,textarea,select{background:rgba(0,255,65,.05);border:1px solid var(--border);color:var(--green);padding:8px 12px;font-family:inherit;font-size:.85rem;border-radius:4px;width:100%}
@@ -41,13 +39,13 @@ select option{background:var(--bg);color:var(--green)}
 .badge.review{border-color:#0af;color:#0af}
 .badge.published{border-color:var(--green);color:var(--green)}
 h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1px}
+.section-icon{color:var(--green);font-weight:bold}
 .form-row{margin-bottom:12px}
 .form-row label{display:block;font-size:.75rem;color:var(--dim);margin-bottom:4px}
 .toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 .empty{color:var(--dim);text-align:center;padding:40px;font-size:.85rem}
 .delete-btn{background:transparent;border:1px solid #600;color:#f66;padding:4px 8px;font-size:.7rem;cursor:pointer;border-radius:3px}
 .delete-btn:hover{background:rgba(255,0,0,.15)}
-/* Calendar grid */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-header{text-align:center;font-size:.7rem;color:var(--dim);padding:4px}
 .cal-day{aspect-ratio:1;border:1px solid var(--border);border-radius:4px;padding:4px;font-size:.65rem;position:relative;cursor:pointer;min-height:60px}
@@ -56,14 +54,14 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 .cal-day.today .num{color:var(--green);font-weight:bold}
 .cal-day.other{opacity:.3}
 .cal-entry{background:rgba(0,255,65,.1);border-radius:2px;padding:1px 3px;margin-top:2px;font-size:.55rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
-/* Modal */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center}
 .modal{background:var(--bg);border:1px solid var(--dark-green);border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 0 30px rgba(0,255,65,.15)}
 .modal h3{margin-bottom:16px;text-shadow:var(--glow)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.loading-bar{text-align:center;color:var(--dim);padding:20px;font-size:.8rem}
 @media(max-width:768px){
-  #sidebar{width:52px}
-  .tab-btn{width:40px;height:40px;font-size:1.1rem}
+  #sidebar{width:56px}
+  .tab-btn{width:44px;padding:6px 2px}
   #content{padding:12px}
   .cal-day{min-height:40px}
 }
@@ -72,21 +70,19 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 <body>
 <canvas id="matrix-bg"></canvas>
 <div id="app">
+  <div id="sidebar">
+    <div class="tab-btn active" data-tab="tasks" onclick="switchTab('tasks')"><span class="tab-icon">►</span><span class="tab-label">Tasks</span></div>
+    <div class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')"><span class="tab-icon">◆</span><span class="tab-label">Calendar</span></div>
+    <div class="tab-btn" data-tab="prompts" onclick="switchTab('prompts')"><span class="tab-icon">◇</span><span class="tab-label">Prompts</span></div>
+    <div class="tab-btn" data-tab="documents" onclick="switchTab('documents')"><span class="tab-icon">▣</span><span class="tab-label">Docs</span></div>
+    <div class="tab-btn" data-tab="content" onclick="switchTab('content')"><span class="tab-icon">▶</span><span class="tab-label">Content</span></div>
+  </div>
   <div id="main">
     <div id="header">
-      <div>
-        <h1>⬡ MISSION CONTROL</h1>
-        <div class="subtitle">REZAH COMMAND CENTER — NORMAN AI ONLINE</div>
-      </div>
+      <h1>⬡ MISSION CONTROL</h1>
+      <div class="subtitle">I am building financial independence through AI entrepreneurship so I can control my time, be fully present for my family, stay physically and spiritually strong, and use my skills to serve those who cannot help themselves—living with purpose, faith, and integrity as an example for my children.</div>
     </div>
-    <div id="content"></div>
-  </div>
-  <div id="sidebar">
-    <div class="tab-btn active" data-tab="tasks" onclick="switchTab('tasks')">⚡<div class="tab-label">Tasks</div></div>
-    <div class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')">📅<div class="tab-label">Calendar</div></div>
-    <div class="tab-btn" data-tab="prompts" onclick="switchTab('prompts')">💬<div class="tab-label">Prompts</div></div>
-    <div class="tab-btn" data-tab="documents" onclick="switchTab('documents')">📄<div class="tab-label">Docs</div></div>
-    <div class="tab-btn" data-tab="content" onclick="switchTab('content')">🎬<div class="tab-label">Content</div></div>
+    <div id="content"><div class="loading-bar">[ CONNECTING TO DATABASE... ]</div></div>
   </div>
 </div>
 
@@ -112,9 +108,71 @@ function drawMatrix(){
 }
 setInterval(drawMatrix,50);
 
-// ---- Storage helpers ----
-function load(k){try{return JSON.parse(localStorage.getItem('mc_'+k))||[]}catch{return[]}}
-function save(k,v){localStorage.setItem('mc_'+k,JSON.stringify(v))}
+// ---- Neon Database ----
+const DATABASE_URL='postgresql://mission_control_owner:npg_Wf1lkqJe0XAz@ep-steep-forest-a2i2mt3u-pooler.eu-central-1.aws.neon.tech/mission_control?sslmode=require';
+
+async function neonQuery(sql, params=[]){
+  const resp=await fetch('https://ep-steep-forest-a2i2mt3u-pooler.eu-central-1.aws.neon.tech/sql',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Neon-Connection-String':DATABASE_URL},
+    body:JSON.stringify({query:sql,params})
+  });
+  const data=await resp.json();
+  if(data.error) console.error('Neon error:',data.error);
+  return data;
+}
+
+// In-memory cache
+const cache={tasks:[],calendar:[],prompts:[],documents:[],content:[]};
+
+async function initDB(){
+  await neonQuery(`CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,title TEXT,assignee TEXT,status TEXT,created BIGINT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS calendar_entries(id TEXT PRIMARY KEY,date TEXT,title TEXT,description TEXT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS prompts(id TEXT PRIMARY KEY,prompt TEXT,response TEXT,created BIGINT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY,title TEXT,content TEXT,created BIGINT,updated BIGINT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS content_items(id TEXT PRIMARY KEY,campaign TEXT,platform TEXT,script TEXT,status TEXT,created BIGINT)`);
+}
+
+async function seedIfEmpty(){
+  const r=await neonQuery('SELECT count(*) as c FROM tasks');
+  const count=parseInt(r.rows?.[0]?.c||r.rows?.[0]?.[0]||'0');
+  if(count>0) return;
+
+  const tasks=[
+    {id:uid(),title:'Launch AI sandbox landing page',assignee:'Norman (AI)',status:'in-progress',created:Date.now()},
+    {id:uid(),title:'Get first 3 paying clients',assignee:'Rezah',status:'pending',created:Date.now()},
+    {id:uid(),title:'30-day expense audit',assignee:'Rezah',status:'pending',created:Date.now()},
+    {id:uid(),title:'Set up razoredge.co.za domain',assignee:'Rezah',status:'pending',created:Date.now()},
+    {id:uid(),title:'Deploy landing page to Vercel',assignee:'Norman (AI)',status:'pending',created:Date.now()},
+    {id:uid(),title:'Validate pricing with 5 potential customers',assignee:'Rezah',status:'pending',created:Date.now()},
+    {id:uid(),title:'Build 15-lead pipeline for Q2',assignee:'Rezah',status:'pending',created:Date.now()},
+    {id:uid(),title:'Negotiate corporate raise/bonus',assignee:'Rezah',status:'pending',created:Date.now()}
+  ];
+  for(const t of tasks) await neonQuery('INSERT INTO tasks(id,title,assignee,status,created) VALUES($1,$2,$3,$4,$5)',[t.id,t.title,t.assignee,t.status,t.created]);
+
+  const cal=[
+    {id:uid(),date:'2026-02-25',title:'Norman activated — Mission Control online',description:''},
+    {id:uid(),date:'2026-03-01',title:'Q1 starts — 90-day sprint begins',description:''},
+    {id:uid(),date:'2026-03-31',title:'Q1 review — 3 clients target',description:''},
+    {id:uid(),date:'2026-06-30',title:'Q2 review — 12 clients target',description:''}
+  ];
+  for(const e of cal) await neonQuery('INSERT INTO calendar_entries(id,date,title,description) VALUES($1,$2,$3,$4)',[e.id,e.date,e.title,e.description]);
+
+  const ci={id:uid(),campaign:'RazorEdge AI Launch',platform:'LinkedIn',script:'Introducing RazorEdge AI — pre-configured AI hardware for South African businesses. No tech skills needed. From R3,500.',status:'draft',created:Date.now()};
+  await neonQuery('INSERT INTO content_items(id,campaign,platform,script,status,created) VALUES($1,$2,$3,$4,$5,$6)',[ci.id,ci.campaign,ci.platform,ci.script,ci.status,ci.created]);
+}
+
+async function loadFromDB(table){
+  const map={tasks:'tasks',calendar:'calendar_entries',prompts:'prompts',documents:'documents',content:'content_items'};
+  const r=await neonQuery(`SELECT * FROM ${map[table]} ORDER BY ${table==='calendar'?'"date"':'created'} ${table==='calendar'?'ASC':'DESC'}`);
+  const rows=(r.rows||[]).map(row=>{
+    if(r.fields){const obj={};r.fields.forEach((f,i)=>obj[f.name]=row[i]);return obj}
+    return row;
+  });
+  cache[table]=rows;
+  return rows;
+}
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 // ---- Tab switching ----
@@ -126,15 +184,15 @@ function switchTab(t){
 }
 
 // ---- Render dispatcher ----
-function render(){
+async function render(){
   const el=document.getElementById('content');
-  ({tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
+  await ({tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
 }
 
 // ---- 1. TASKS ----
-function renderTasks(el){
-  const tasks=load('tasks');
-  el.innerHTML=`<h2>⚡ TASKS</h2>
+async function renderTasks(el){
+  const tasks=await loadFromDB('tasks');
+  el.innerHTML=`<h2><span class="section-icon">►</span> TASKS</h2>
     <div class="toolbar">
       <button onclick="addTask()">+ New Task</button>
       <select id="taskFilter" onchange="render()" style="width:auto">
@@ -148,7 +206,7 @@ function renderTasks(el){
     <div class="card" style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-size:.9rem">${esc(t.title)}</div>
-        <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${t.assignee?'Assigned: '+esc(t.assignee):''} ${t.created?'• '+new Date(t.created).toLocaleDateString():''}</div>
+        <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${t.assignee?'Assigned: '+esc(t.assignee):''} ${t.created?'• '+new Date(Number(t.created)).toLocaleDateString():''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
         <span class="badge ${t.status}">${t.status}</span>
@@ -161,25 +219,30 @@ function renderTasks(el){
       </div>
     </div>`).join(''):'<div class="empty">No tasks yet. Click + New Task to begin.</div>';
 }
+
 function addTask(){showModal('New Task',`
   <div class="form-row"><label>Title</label><input id="mTitle"></div>
   <div class="form-row"><label>Assignee</label><input id="mAssignee" value="Norman (AI)"></div>
-`,()=>{
-  const tasks=load('tasks');
-  tasks.unshift({id:uid(),title:document.getElementById('mTitle').value,assignee:document.getElementById('mAssignee').value,status:'pending',created:Date.now()});
-  save('tasks',tasks);render();
+`,async()=>{
+  const id=uid(),title=document.getElementById('mTitle').value,assignee=document.getElementById('mAssignee').value;
+  await neonQuery('INSERT INTO tasks(id,title,assignee,status,created) VALUES($1,$2,$3,$4,$5)',[id,title,assignee,'pending',Date.now()]);
+  render();
 })}
-function updateTaskStatus(id,s){const tasks=load('tasks');const t=tasks.find(x=>x.id===id);if(t){t.status=s;save('tasks',tasks);render()}}
+
+async function updateTaskStatus(id,s){
+  await neonQuery('UPDATE tasks SET status=$1 WHERE id=$2',[s,id]);
+  render();
+}
 
 // ---- 2. CALENDAR ----
-let calYear=2026,calMonth=1; // 0-indexed: 1=Feb
-function renderCalendar(el){
-  const entries=load('calendar');
+let calYear=2026,calMonth=1;
+async function renderCalendar(el){
+  const entries=await loadFromDB('calendar');
   const d=new Date(calYear,calMonth,1),dow=d.getDay(),dim=new Date(calYear,calMonth+1,0).getDate();
   const prevDim=new Date(calYear,calMonth,0).getDate();
   const mName=d.toLocaleString('default',{month:'long',year:'numeric'});
   const today=new Date();
-  el.innerHTML=`<h2>📅 CALENDAR</h2>
+  el.innerHTML=`<h2><span class="section-icon">◆</span> CALENDAR</h2>
     <div class="toolbar">
       <button onclick="calNav(-1)">◀</button>
       <span style="min-width:160px;text-align:center">${mName}</span>
@@ -212,30 +275,30 @@ function addCalEntry(){showModal('New Calendar Entry',`
   <div class="form-row"><label>Date</label><input id="mDate" type="date"></div>
   <div class="form-row"><label>Title</label><input id="mETitle"></div>
   <div class="form-row"><label>Description</label><textarea id="mEDesc"></textarea></div>
-`,()=>{
-  const entries=load('calendar');
-  entries.push({id:uid(),date:document.getElementById('mDate').value,title:document.getElementById('mETitle').value,desc:document.getElementById('mEDesc').value});
-  save('calendar',entries);render();
+`,async()=>{
+  const id=uid();
+  await neonQuery('INSERT INTO calendar_entries(id,date,title,description) VALUES($1,$2,$3,$4)',[id,document.getElementById('mDate').value,document.getElementById('mETitle').value,document.getElementById('mEDesc').value]);
+  render();
 })}
-function showDayEntries(ds){
-  const entries=load('calendar').filter(e=>e.date===ds);
+async function showDayEntries(ds){
+  const entries=(await loadFromDB('calendar')).filter(e=>e.date===ds);
   if(!entries.length)return;
-  showModal('Entries for '+ds,entries.map(e=>`<div class="card"><strong>${esc(e.title)}</strong><div style="font-size:.8rem;color:var(--dim);margin-top:4px">${esc(e.desc||'')}</div><button class="delete-btn" style="margin-top:8px" onclick="deleteItem('calendar','${e.id}')">Delete</button></div>`).join(''),null);
+  showModal('Entries for '+ds,entries.map(e=>`<div class="card"><strong>${esc(e.title)}</strong><div style="font-size:.8rem;color:var(--dim);margin-top:4px">${esc(e.description||'')}</div><button class="delete-btn" style="margin-top:8px" onclick="deleteItem('calendar','${e.id}')">Delete</button></div>`).join(''),null);
 }
 
 // ---- 3. PROMPTS ----
-function renderPrompts(el){
-  const prompts=load('prompts');
-  el.innerHTML=`<h2>💬 PROMPT LOG</h2>
+async function renderPrompts(el){
+  const prompts=await loadFromDB('prompts');
+  el.innerHTML=`<h2><span class="section-icon">◇</span> PROMPT LOG</h2>
     <div class="toolbar">
       <input id="promptSearch" placeholder="Search prompts..." oninput="render()" style="max-width:300px">
       <button onclick="addPrompt()" style="margin-left:auto">+ Log Prompt</button>
     </div><div id="promptList"></div>`;
   const q=(document.getElementById('promptSearch')?.value||'').toLowerCase();
-  const filtered=prompts.filter(p=>!q||p.prompt.toLowerCase().includes(q)||p.response.toLowerCase().includes(q));
+  const filtered=prompts.filter(p=>!q||(p.prompt||'').toLowerCase().includes(q)||(p.response||'').toLowerCase().includes(q));
   document.getElementById('promptList').innerHTML=filtered.length?filtered.map(p=>`
     <div class="card">
-      <div style="font-size:.65rem;color:var(--dim);margin-bottom:6px">${new Date(p.created).toLocaleString()}</div>
+      <div style="font-size:.65rem;color:var(--dim);margin-bottom:6px">${new Date(Number(p.created)).toLocaleString()}</div>
       <div style="margin-bottom:8px"><strong style="color:#0f0">PROMPT:</strong> ${esc(p.prompt)}</div>
       <div><strong style="color:var(--dim)">RESPONSE:</strong> ${esc(p.response)}</div>
       <button class="delete-btn" style="margin-top:8px" onclick="deleteItem('prompts','${p.id}')">✕</button>
@@ -244,25 +307,25 @@ function renderPrompts(el){
 function addPrompt(){showModal('Log Prompt',`
   <div class="form-row"><label>Prompt</label><textarea id="mPrompt"></textarea></div>
   <div class="form-row"><label>Response</label><textarea id="mResponse"></textarea></div>
-`,()=>{
-  const prompts=load('prompts');
-  prompts.unshift({id:uid(),prompt:document.getElementById('mPrompt').value,response:document.getElementById('mResponse').value,created:Date.now()});
-  save('prompts',prompts);render();
+`,async()=>{
+  const id=uid();
+  await neonQuery('INSERT INTO prompts(id,prompt,response,created) VALUES($1,$2,$3,$4)',[id,document.getElementById('mPrompt').value,document.getElementById('mResponse').value,Date.now()]);
+  render();
 })}
 
 // ---- 4. DOCUMENTS ----
 let editingDoc=null;
-function renderDocuments(el){
-  const docs=load('documents');
+async function renderDocuments(el){
+  const docs=await loadFromDB('documents');
   if(editingDoc){
     const d=docs.find(x=>x.id===editingDoc)||{id:null,title:'',content:''};
-    el.innerHTML=`<h2>📄 ${d.id?'EDIT':'NEW'} DOCUMENT</h2>
+    el.innerHTML=`<h2><span class="section-icon">▣</span> ${d.id?'EDIT':'NEW'} DOCUMENT</h2>
       <div class="form-row"><label>Title</label><input id="docTitle" value="${esc(d.title)}"></div>
       <div class="form-row"><label>Content (Markdown)</label><textarea id="docContent" style="min-height:300px">${esc(d.content)}</textarea></div>
       <div class="toolbar"><button onclick="saveDoc('${d.id}')">Save</button><button onclick="editingDoc=null;render()">Cancel</button></div>`;
     return;
   }
-  el.innerHTML=`<h2>📄 DOCUMENTS</h2>
+  el.innerHTML=`<h2><span class="section-icon">▣</span> DOCUMENTS</h2>
     <div class="toolbar"><button onclick="editingDoc='new';render()">+ New Document</button></div>
     <div id="docList"></div>`;
   document.getElementById('docList').innerHTML=docs.length?docs.map(d=>`
@@ -274,26 +337,28 @@ function renderDocuments(el){
           <button class="delete-btn" onclick="event.stopPropagation();deleteItem('documents','${d.id}')">✕</button>
         </div>
       </div>
-      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${new Date(d.updated).toLocaleDateString()} • ${d.content.length} chars</div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${new Date(Number(d.updated)).toLocaleDateString()} • ${(d.content||'').length} chars</div>
     </div>`).join(''):'<div class="empty">No documents yet.</div>';
 }
-function saveDoc(id){
-  const docs=load('documents');
-  const title=document.getElementById('docTitle').value;
-  const content=document.getElementById('docContent').value;
-  if(id&&id!=='null'){const d=docs.find(x=>x.id===id);if(d){d.title=title;d.content=content;d.updated=Date.now()}}
-  else{docs.unshift({id:uid(),title,content,created:Date.now(),updated:Date.now()})}
-  save('documents',docs);editingDoc=null;render();
+async function saveDoc(id){
+  const title=document.getElementById('docTitle').value,content=document.getElementById('docContent').value,now=Date.now();
+  if(id&&id!=='null'){
+    await neonQuery('UPDATE documents SET title=$1,content=$2,updated=$3 WHERE id=$4',[title,content,now,id]);
+  }else{
+    await neonQuery('INSERT INTO documents(id,title,content,created,updated) VALUES($1,$2,$3,$4,$5)',[uid(),title,content,now,now]);
+  }
+  editingDoc=null;render();
 }
-function viewDoc(id){
-  const d=load('documents').find(x=>x.id===id);if(!d)return;
+async function viewDoc(id){
+  const docs=await loadFromDB('documents');
+  const d=docs.find(x=>x.id===id);if(!d)return;
   showModal(d.title,`<div style="white-space:pre-wrap;font-size:.85rem;line-height:1.6">${esc(d.content)}</div>`,null);
 }
 
 // ---- 5. CONTENT ----
-function renderContent(el){
-  const items=load('content');
-  el.innerHTML=`<h2>🎬 CONTENT TRACKER</h2>
+async function renderContent(el){
+  const items=await loadFromDB('content');
+  el.innerHTML=`<h2><span class="section-icon">▶</span> CONTENT TRACKER</h2>
     <div class="toolbar">
       <button onclick="addContent()">+ New Script</button>
       <select id="contentFilter" onchange="render()" style="width:auto">
@@ -324,12 +389,15 @@ function addContent(){showModal('New Content Script',`
   <div class="form-row"><label>Campaign Name</label><input id="mCampaign"></div>
   <div class="form-row"><label>Platform</label><input id="mPlatform" placeholder="YouTube, TikTok, Instagram..."></div>
   <div class="form-row"><label>Script</label><textarea id="mScript" style="min-height:120px"></textarea></div>
-`,()=>{
-  const items=load('content');
-  items.unshift({id:uid(),campaign:document.getElementById('mCampaign').value,platform:document.getElementById('mPlatform').value,script:document.getElementById('mScript').value,status:'draft',created:Date.now()});
-  save('content',items);render();
+`,async()=>{
+  const id=uid();
+  await neonQuery('INSERT INTO content_items(id,campaign,platform,script,status,created) VALUES($1,$2,$3,$4,$5,$6)',[id,document.getElementById('mCampaign').value,document.getElementById('mPlatform').value,document.getElementById('mScript').value,'draft',Date.now()]);
+  render();
 })}
-function updateContentStatus(id,s){const items=load('content');const i=items.find(x=>x.id===id);if(i){i.status=s;save('content',items);render()}}
+async function updateContentStatus(id,s){
+  await neonQuery('UPDATE content_items SET status=$1 WHERE id=$2',[s,id]);
+  render();
+}
 
 // ---- Shared: Modal, Delete, Escape ----
 function showModal(title,body,onSave){
@@ -341,11 +409,27 @@ function showModal(title,body,onSave){
   overlay._save=()=>{onSave();overlay.remove()};
   document.body.appendChild(overlay);
 }
-function deleteItem(key,id){const items=load(key).filter(x=>x.id!==id);save(key,items);render();document.querySelectorAll('.modal-overlay').forEach(m=>m.remove())}
+
+async function deleteItem(key,id){
+  const map={tasks:'tasks',calendar:'calendar_entries',prompts:'prompts',documents:'documents',content:'content_items'};
+  await neonQuery(`DELETE FROM ${map[key]} WHERE id=$1`,[id]);
+  render();
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.remove());
+}
+
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
 // ---- Init ----
-render();
+(async()=>{
+  try{
+    await initDB();
+    await seedIfEmpty();
+    await render();
+  }catch(e){
+    console.error('Init error:',e);
+    document.getElementById('content').innerHTML='<div class="empty">[ DATABASE CONNECTION ERROR — Check console ]</div>';
+  }
+})();
 </script>
 </body>
 </html>
