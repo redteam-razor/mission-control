@@ -71,7 +71,8 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 <canvas id="matrix-bg"></canvas>
 <div id="app">
   <div id="sidebar">
-    <div class="tab-btn active" data-tab="tasks" onclick="switchTab('tasks')"><span class="tab-icon">►</span><span class="tab-label">Tasks</span></div>
+    <div class="tab-btn active" data-tab="brief" onclick="switchTab('brief')"><span class="tab-icon">◈</span><span class="tab-label">Brief</span></div>
+    <div class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')"><span class="tab-icon">►</span><span class="tab-label">Tasks</span></div>
     <div class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')"><span class="tab-icon">◆</span><span class="tab-label">Calendar</span></div>
     <div class="tab-btn" data-tab="prompts" onclick="switchTab('prompts')"><span class="tab-icon">◇</span><span class="tab-label">Prompts</span></div>
     <div class="tab-btn" data-tab="documents" onclick="switchTab('documents')"><span class="tab-icon">▣</span><span class="tab-label">Docs</span></div>
@@ -170,7 +171,7 @@ async function loadFromDB(table){
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 // ---- Tab switching ----
-let currentTab='tasks';
+let currentTab='brief';
 function switchTab(t){
   currentTab=t;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
@@ -180,7 +181,55 @@ function switchTab(t){
 // ---- Render dispatcher ----
 async function render(){
   const el=document.getElementById('content');
-  await ({tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
+  await ({brief:renderDailyBrief,tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
+}
+
+// ---- 0. DAILY BRIEF ----
+function timeAgo(dateStr){
+  if(!dateStr)return '';
+  const s=Math.floor((Date.now()-new Date(dateStr).getTime())/1000);
+  if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+async function renderDailyBrief(el){
+  el.innerHTML=`<h2><span class="section-icon">◈</span> DAILY BRIEF</h2>
+    <div class="toolbar"><button onclick="fetchBrief(true)">↻ Refresh</button><span id="briefGenTime" style="font-size:.7rem;color:var(--dim);margin-left:auto"></span></div>
+    <div id="briefContent"><div class="loading-bar">[ FETCHING DAILY BRIEF... ]</div></div>`;
+  fetchBrief(false);
+}
+async function fetchBrief(force){
+  const el=document.getElementById('briefContent');
+  if(!el)return;
+  if(force)el.innerHTML='<div class="loading-bar">[ REFRESHING... ]</div>';
+  try{
+    const r=await fetch('/api/brief');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const gt=document.getElementById('briefGenTime');
+    if(gt)gt.textContent='Generated: '+new Date(data.generated).toLocaleString();
+    const icons={ai:'[AI]',sa:'[SA]',world:'[WORLD]'};
+    const labels={ai:'AI DEVELOPMENTS',sa:'SOUTH AFRICA',world:'WORLD NEWS'};
+    let html='';
+    for(const key of ['ai','sa','world']){
+      const sec=data.sections[key];
+      html+=`<div style="margin-bottom:24px"><h2 style="font-size:.95rem;margin-bottom:10px"><span style="color:var(--green)">${icons[key]}</span> ${labels[key]}</h2>`;
+      if(!sec||!sec.items.length){html+='<div class="empty">No items available.</div>';html+='</div>';continue;}
+      html+=sec.items.map(i=>`<div class="card" style="padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <a href="${esc(i.link)}" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none;font-size:.85rem;flex:1">${esc(i.title)}</a>
+          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+            <span class="badge" style="border-color:var(--dark-green);color:var(--dim)">${esc(i.source)}</span>
+            <span style="font-size:.65rem;color:var(--dim);white-space:nowrap">${timeAgo(i.date)}</span>
+          </div>
+        </div>
+        ${i.snippet?`<div style="font-size:.75rem;color:var(--dim);margin-top:6px;line-height:1.4">${esc(i.snippet)}</div>`:''}
+      </div>`).join('');
+      html+='</div>';
+    }
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML=`<div class="empty">[ BRIEF UNAVAILABLE: ${esc(e.message)} ]<br><br><button onclick="fetchBrief(true)">Retry</button></div>`;
+  }
 }
 
 // ---- 1. TASKS ----
@@ -416,12 +465,13 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 // ---- Init ----
 (async()=>{
   try{
+    if(currentTab==='brief'){render();}
     await initDB();
     await seedIfEmpty();
-    await render();
+    if(currentTab!=='brief'){await render();}
   }catch(e){
     console.error('Init error:',e);
-    document.getElementById('content').innerHTML='<div class="empty">[ DATABASE CONNECTION ERROR — Check console ]</div>';
+    if(currentTab!=='brief')document.getElementById('content').innerHTML='<div class="empty">[ DATABASE CONNECTION ERROR — Check console ]</div>';
   }
 })();
 </script>
