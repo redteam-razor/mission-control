@@ -75,6 +75,27 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 .modal h3{margin-bottom:16px;text-shadow:var(--glow)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .loading-bar{text-align:center;color:var(--dim);padding:20px;font-size:.8rem}
+.radar-stat{background:rgba(0,255,65,.05);border:1px solid var(--border);border-radius:6px;padding:12px 16px;text-align:center;min-width:100px}
+.radar-stat .val{font-size:1.4rem;font-weight:bold;color:var(--green);text-shadow:var(--glow)}
+.radar-stat .lbl{font-size:.65rem;color:var(--dim);margin-top:2px}
+.insight-card{background:rgba(13,17,23,.8);border-radius:8px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+.insight-card.strong{border:1px solid #0f6;box-shadow:0 0 15px rgba(0,255,65,.2)}
+.insight-card.moderate{border:1px solid #ff6;box-shadow:0 0 10px rgba(255,255,0,.12)}
+.insight-card.emerging{border:1px solid var(--border)}
+.strength-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:bold;text-transform:uppercase}
+.strength-badge.strong{background:rgba(0,255,65,.15);color:#0f6;border:1px solid #0f6}
+.strength-badge.moderate{background:rgba(255,255,0,.1);color:#ff6;border:1px solid #ff6}
+.strength-badge.emerging{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--border)}
+.src-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:.6rem;border:1px solid var(--dim);color:var(--dim);margin-right:4px}
+.radar-section{margin-bottom:24px}
+.radar-section h3{font-size:.9rem;margin-bottom:10px;color:var(--green);text-shadow:0 0 6px rgba(0,255,65,.2)}
+.radar-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(26,58,26,.4)}
+.radar-item:hover{background:rgba(0,255,65,.04)}
+.radar-item a{color:var(--green);text-decoration:none;font-size:.8rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.radar-item a:hover{text-decoration:underline}
+.radar-item .metrics{display:flex;gap:8px;flex-shrink:0;font-size:.7rem;color:var(--dim);margin-left:12px}
+.radar-tooltip{position:relative;cursor:help;color:var(--dim);font-size:.75rem;border-bottom:1px dashed var(--dim)}
+.radar-tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:0;background:var(--bg);border:1px solid var(--dark-green);padding:8px 12px;font-size:.7rem;color:var(--green);white-space:normal;width:280px;z-index:10;border-radius:4px;box-shadow:0 0 12px rgba(0,255,65,.15)}
 @media(max-width:768px){
   #sidebar{width:56px}
   .tab-btn{width:44px;padding:6px 2px}
@@ -88,6 +109,7 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 <div id="app">
   <div id="sidebar">
     <div class="tab-btn active" data-tab="brief" onclick="switchTab('brief')"><span class="tab-icon">◈</span><span class="tab-label">Brief</span></div>
+    <div class="tab-btn" data-tab="radar" onclick="switchTab('radar')"><span class="tab-icon">◎</span><span class="tab-label">Radar</span></div>
     <div class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')"><span class="tab-icon">►</span><span class="tab-label">Tasks</span></div>
     <div class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')"><span class="tab-icon">◆</span><span class="tab-label">Calendar</span></div>
     <div class="tab-btn" data-tab="prompts" onclick="switchTab('prompts')"><span class="tab-icon">◇</span><span class="tab-label">Prompts</span></div>
@@ -203,7 +225,7 @@ function switchTab(t){
 // ---- Render dispatcher ----
 async function render(){
   const el=document.getElementById('content');
-  await ({brief:renderDailyBrief,tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
+  await ({brief:renderDailyBrief,radar:renderRadar,tasks:renderTasks,calendar:renderCalendar,prompts:renderPrompts,documents:renderDocuments,content:renderContent})[currentTab](el);
 }
 
 // ---- 0. DAILY BRIEF ----
@@ -251,6 +273,82 @@ async function fetchBrief(force){
     el.innerHTML=html;
   }catch(e){
     el.innerHTML=`<div class="empty">[ BRIEF UNAVAILABLE: ${esc(e.message)} ]<br><br><button onclick="fetchBrief(true)">Retry</button></div>`;
+  }
+}
+
+// ---- 0.5 TREND RADAR ----
+async function renderRadar(el){
+  el.innerHTML=`<h2><span class="section-icon">◎</span> TREND RADAR</h2>
+    <div class="toolbar">
+      <button onclick="fetchRadar(true)">↻ Refresh</button>
+      <span class="radar-tooltip" data-tip="Social Arbitrage: Spot consumer behaviour shifts before Wall Street prices them in. Based on Chris Camillo's methodology — detect information imbalances across multiple sources.">ℹ What is this?</span>
+      <span id="radarTime" style="font-size:.7rem;color:var(--dim);margin-left:auto"></span>
+    </div>
+    <div id="radarContent"><div class="loading-bar">[ SCANNING TREND SIGNALS... ]</div></div>`;
+  fetchRadar(false);
+}
+async function fetchRadar(force){
+  const el=document.getElementById('radarContent');
+  if(!el)return;
+  if(force)el.innerHTML='<div class="loading-bar">[ REFRESHING SIGNALS... ]</div>';
+  try{
+    const r=await fetch('/api/trends'+(force?'?force=1':''));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const gt=document.getElementById('radarTime');
+    if(gt)gt.textContent='Updated: '+new Date(data.generated).toLocaleString();
+
+    const sigs=data.signals;
+    const totalItems=Object.values(sigs).reduce((n,s)=>n+(s.items||[]).length,0);
+    const strongCount=(data.insights||[]).filter(i=>i.signal_strength==='strong').length;
+    const online=Object.values(sigs).filter(s=>s.status==='online').length;
+    const total=Object.keys(sigs).length;
+
+    let html=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+      <div class="radar-stat"><div class="val">${totalItems}</div><div class="lbl">SIGNALS</div></div>
+      <div class="radar-stat"><div class="val" style="color:#0f6">${strongCount}</div><div class="lbl">STRONG</div></div>
+      <div class="radar-stat"><div class="val">${online}/${total}</div><div class="lbl">SOURCES</div></div>
+      <div class="radar-stat"><div class="val">${(data.insights||[]).length}</div><div class="lbl">INSIGHTS</div></div>
+    </div>`;
+
+    // Cross-signal insights
+    if(data.insights&&data.insights.length){
+      html+=`<div class="radar-section"><h3>⚡ CROSS-SIGNAL INSIGHTS</h3>`;
+      html+=data.insights.map(i=>`<div class="insight-card ${i.signal_strength}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <div style="flex:1;font-size:.85rem">${esc(i.trend)}</div>
+          <span class="strength-badge ${i.signal_strength}">${i.signal_strength}</span>
+        </div>
+        <div style="margin-bottom:6px">${i.sources.map(s=>`<span class="src-badge">${esc(s)}</span>`).join('')}
+          <span class="badge" style="border-color:var(--dim);color:var(--dim);margin-left:4px">${esc(i.category)}</span></div>
+        ${i.potential_plays?`<div style="font-size:.75rem;color:var(--dim);margin-top:4px">💡 ${esc(i.potential_plays)}</div>`:''}
+      </div>`).join('');
+      html+=`</div>`;
+    }
+
+    // Source feeds
+    const sections=[
+      {key:'google_trends_za',icon:'🇿🇦',render:i=>`<div class="radar-item"><a href="${esc(i.link)}" target="_blank">${esc(i.title)}</a><div class="metrics">${i.traffic?`<span>📈 ${esc(i.traffic)}</span>`:''}</div></div>`},
+      {key:'google_trends_us',icon:'🌍',render:i=>`<div class="radar-item"><a href="${esc(i.link)}" target="_blank">${esc(i.title)}</a><div class="metrics">${i.traffic?`<span>📈 ${esc(i.traffic)}</span>`:''}</div></div>`},
+      {key:'reddit_hot',icon:'💬',render:i=>`<div class="radar-item"><a href="${esc(i.link)}" target="_blank">${esc(i.title)}</a><div class="metrics"><span>r/${esc(i.subreddit)}</span><span>▲${i.score}</span><span>💬${i.comments}</span></div></div>`},
+      {key:'hacker_news',icon:'⚡',render:i=>`<div class="radar-item"><a href="${esc(i.link)}" target="_blank">${esc(i.title)}</a><div class="metrics"><span>▲${i.score}</span><span>💬${i.comments}</span></div></div>`}
+    ];
+
+    for(const sec of sections){
+      const s=sigs[sec.key];
+      if(!s)continue;
+      const statusBadge=s.status==='online'?'<span style="color:#0f6;font-size:.7rem">● online</span>':'<span style="color:#f44;font-size:.7rem">● failed</span>';
+      html+=`<div class="radar-section"><h3>${sec.icon} ${esc(s.label)} ${statusBadge}</h3>`;
+      if(!s.items||!s.items.length){html+=`<div class="empty" style="padding:12px">No data available</div>`;
+      }else{
+        html+=`<div class="card" style="padding:0;overflow:hidden">${s.items.map(sec.render).join('')}</div>`;
+      }
+      html+=`</div>`;
+    }
+
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML=`<div class="empty">[ RADAR UNAVAILABLE: ${esc(e.message)} ]<br><br><button onclick="fetchRadar(true)">Retry</button></div>`;
   }
 }
 
