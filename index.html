@@ -17,7 +17,6 @@ canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;op
 #content{flex:1;overflow-y:auto;padding:24px;background:rgba(10,10,10,.7)}
 #content::-webkit-scrollbar{width:6px}
 #content::-webkit-scrollbar-thumb{background:var(--dark-green);border-radius:3px}
-/* LEFT sidebar */
 #sidebar{width:72px;background:rgba(13,17,23,.9);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:12px;gap:4px;backdrop-filter:blur(8px);order:-1}
 .tab-btn{width:56px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:none;background:transparent;color:var(--dim);cursor:pointer;border-radius:6px;transition:all .2s;gap:3px}
 .tab-btn:hover{background:rgba(0,255,65,.08);color:var(--green)}
@@ -38,6 +37,23 @@ select option{background:var(--bg);color:var(--green)}
 .badge.draft{border-color:#ff6;color:#ff6}
 .badge.review{border-color:#0af;color:#0af}
 .badge.published{border-color:var(--green);color:var(--green)}
+.badge.urgent{border-color:#f44;color:#f44}
+.badge.high{border-color:#f90;color:#f90}
+.badge.medium{border-color:#ff6;color:#ff6}
+.badge.low{border-color:var(--green);color:var(--green)}
+.badge.business{border-color:#0af;color:#0af}
+.badge.personal{border-color:#a6f;color:#a6f}
+.badge.health{border-color:#0f6;color:#0f6}
+.badge.family{border-color:#f6a;color:#f6a}
+.badge.spiritual{border-color:#ff6;color:#ff6}
+.badge.meeting{border-color:#0af;color:#0af}
+.badge.deadline{border-color:#f44;color:#f44}
+.due-overdue{color:#f44;font-weight:bold}
+.due-today{color:#ff6;font-weight:bold}
+.due-future{color:var(--dim)}
+.task-desc{font-size:.75rem;color:var(--dim);margin-top:4px;max-height:2.4em;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.edit-btn{background:transparent;border:1px solid var(--dark-green);color:var(--green);padding:4px 8px;font-size:.7rem;cursor:pointer;border-radius:3px}
+.edit-btn:hover{background:rgba(0,255,65,.15)}
 h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1px}
 .section-icon{color:var(--green);font-weight:bold}
 .form-row{margin-bottom:12px}
@@ -121,15 +137,21 @@ async function neonQuery(sql, params=[]){
   return data.rows;
 }
 
-// In-memory cache
 const cache={tasks:[],calendar:[],prompts:[],documents:[],content:[]};
 
 async function initDB(){
-  await neonQuery(`CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,title TEXT,assignee TEXT,status TEXT,created BIGINT)`);
-  await neonQuery(`CREATE TABLE IF NOT EXISTS calendar_entries(id TEXT PRIMARY KEY,date TEXT,title TEXT,description TEXT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,title TEXT,assignee TEXT,status TEXT,created BIGINT,due_date TEXT,priority TEXT DEFAULT 'medium',description TEXT,category TEXT)`);
+  await neonQuery(`CREATE TABLE IF NOT EXISTS calendar_entries(id TEXT PRIMARY KEY,date TEXT,title TEXT,description TEXT,time TEXT,category TEXT)`);
   await neonQuery(`CREATE TABLE IF NOT EXISTS prompts(id TEXT PRIMARY KEY,prompt TEXT,response TEXT,created BIGINT)`);
   await neonQuery(`CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY,title TEXT,content TEXT,created BIGINT,updated BIGINT)`);
   await neonQuery(`CREATE TABLE IF NOT EXISTS content_items(id TEXT PRIMARY KEY,campaign TEXT,platform TEXT,script TEXT,status TEXT,created BIGINT)`);
+  // Alter existing tables to add new columns
+  try { await neonQuery('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS due_date TEXT') } catch(e){}
+  try { await neonQuery('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT \'medium\'') } catch(e){}
+  try { await neonQuery('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS description TEXT') } catch(e){}
+  try { await neonQuery('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS category TEXT') } catch(e){}
+  try { await neonQuery('ALTER TABLE calendar_entries ADD COLUMN IF NOT EXISTS time TEXT') } catch(e){}
+  try { await neonQuery('ALTER TABLE calendar_entries ADD COLUMN IF NOT EXISTS category TEXT') } catch(e){}
 }
 
 async function seedIfEmpty(){
@@ -138,24 +160,24 @@ async function seedIfEmpty(){
   if(count>0) return;
 
   const tasks=[
-    {id:uid(),title:'Launch AI sandbox landing page',assignee:'Norman (AI)',status:'in-progress',created:Date.now()},
-    {id:uid(),title:'Get first 3 paying clients',assignee:'Rezah',status:'pending',created:Date.now()},
-    {id:uid(),title:'30-day expense audit',assignee:'Rezah',status:'pending',created:Date.now()},
-    {id:uid(),title:'Set up razoredge.co.za domain',assignee:'Rezah',status:'pending',created:Date.now()},
-    {id:uid(),title:'Deploy landing page to Vercel',assignee:'Norman (AI)',status:'pending',created:Date.now()},
-    {id:uid(),title:'Validate pricing with 5 potential customers',assignee:'Rezah',status:'pending',created:Date.now()},
-    {id:uid(),title:'Build 15-lead pipeline for Q2',assignee:'Rezah',status:'pending',created:Date.now()},
-    {id:uid(),title:'Negotiate corporate raise/bonus',assignee:'Rezah',status:'pending',created:Date.now()}
+    {id:uid(),title:'Launch AI sandbox landing page',assignee:'Norman (AI)',status:'in-progress',created:Date.now(),priority:'high',category:'business',description:'Design and deploy the initial landing page for RazorEdge AI',due_date:'2026-03-10'},
+    {id:uid(),title:'Get first 3 paying clients',assignee:'Rezah',status:'pending',created:Date.now(),priority:'urgent',category:'business',description:'Close deals with at least 3 paying customers',due_date:'2026-03-31'},
+    {id:uid(),title:'30-day expense audit',assignee:'Rezah',status:'pending',created:Date.now(),priority:'high',category:'personal',description:'Review all expenses over the past 30 days',due_date:'2026-03-15'},
+    {id:uid(),title:'Set up razoredge.co.za domain',assignee:'Rezah',status:'pending',created:Date.now(),priority:'medium',category:'business',description:'',due_date:'2026-03-05'},
+    {id:uid(),title:'Deploy landing page to Vercel',assignee:'Norman (AI)',status:'pending',created:Date.now(),priority:'medium',category:'business',description:'',due_date:'2026-03-07'},
+    {id:uid(),title:'Validate pricing with 5 potential customers',assignee:'Rezah',status:'pending',created:Date.now(),priority:'high',category:'business',description:'Get feedback on pricing model',due_date:'2026-03-20'},
+    {id:uid(),title:'Build 15-lead pipeline for Q2',assignee:'Rezah',status:'pending',created:Date.now(),priority:'medium',category:'business',description:'',due_date:'2026-06-30'},
+    {id:uid(),title:'Negotiate corporate raise/bonus',assignee:'Rezah',status:'pending',created:Date.now(),priority:'low',category:'personal',description:'',due_date:''}
   ];
-  for(const t of tasks) await neonQuery('INSERT INTO tasks(id,title,assignee,status,created) VALUES($1,$2,$3,$4,$5)',[t.id,t.title,t.assignee,t.status,t.created]);
+  for(const t of tasks) await neonQuery('INSERT INTO tasks(id,title,assignee,status,created,due_date,priority,description,category) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',[t.id,t.title,t.assignee,t.status,t.created,t.due_date,t.priority,t.description,t.category]);
 
   const cal=[
-    {id:uid(),date:'2026-02-25',title:'Norman activated — Mission Control online',description:''},
-    {id:uid(),date:'2026-03-01',title:'Q1 starts — 90-day sprint begins',description:''},
-    {id:uid(),date:'2026-03-31',title:'Q1 review — 3 clients target',description:''},
-    {id:uid(),date:'2026-06-30',title:'Q2 review — 12 clients target',description:''}
+    {id:uid(),date:'2026-02-25',title:'Norman activated — Mission Control online',description:'',time:'',category:'business'},
+    {id:uid(),date:'2026-03-01',title:'Q1 starts — 90-day sprint begins',description:'',time:'08:00',category:'business'},
+    {id:uid(),date:'2026-03-31',title:'Q1 review — 3 clients target',description:'',time:'09:00',category:'deadline'},
+    {id:uid(),date:'2026-06-30',title:'Q2 review — 12 clients target',description:'',time:'09:00',category:'deadline'}
   ];
-  for(const e of cal) await neonQuery('INSERT INTO calendar_entries(id,date,title,description) VALUES($1,$2,$3,$4)',[e.id,e.date,e.title,e.description]);
+  for(const e of cal) await neonQuery('INSERT INTO calendar_entries(id,date,title,description,time,category) VALUES($1,$2,$3,$4,$5,$6)',[e.id,e.date,e.title,e.description,e.time,e.category]);
 
   const ci={id:uid(),campaign:'RazorEdge AI Launch',platform:'LinkedIn',script:'Introducing RazorEdge AI — pre-configured AI hardware for South African businesses. No tech skills needed. From R3,500.',status:'draft',created:Date.now()};
   await neonQuery('INSERT INTO content_items(id,campaign,platform,script,status,created) VALUES($1,$2,$3,$4,$5,$6)',[ci.id,ci.campaign,ci.platform,ci.script,ci.status,ci.created]);
@@ -234,43 +256,172 @@ async function fetchBrief(force){
 
 // ---- 1. TASKS ----
 let taskFilterValue='all';
+let taskAssigneeFilter='all';
+let taskCategoryFilter='all';
+let taskPriorityFilter='all';
+let taskSortBy='created';
+
+function getDueClass(due_date){
+  if(!due_date)return '';
+  const today=new Date();today.setHours(0,0,0,0);
+  const d=new Date(due_date+'T00:00:00');
+  if(d<today)return 'due-overdue';
+  if(d.getTime()===today.getTime())return 'due-today';
+  return 'due-future';
+}
+
+function formatDueDate(due_date){
+  if(!due_date)return '';
+  const d=new Date(due_date+'T00:00:00');
+  return d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'});
+}
+
+const priorityOrder={urgent:0,high:1,medium:2,low:3};
+
 async function renderTasks(el){
   const tasks=await loadFromDB('tasks');
   el.innerHTML=`<h2><span class="section-icon">►</span> TASKS</h2>
     <div class="toolbar">
       <button onclick="addTask()">+ New Task</button>
-      <select id="taskFilter" onchange="taskFilterValue=this.value;render()" style="width:auto">
-        <option value="all"${taskFilterValue==='all'?' selected':''}>All</option><option value="pending"${taskFilterValue==='pending'?' selected':''}>Pending</option><option value="in-progress"${taskFilterValue==='in-progress'?' selected':''}>In Progress</option><option value="done"${taskFilterValue==='done'?' selected':''}>Done</option>
+      <select onchange="taskFilterValue=this.value;render()" style="width:auto">
+        <option value="all"${taskFilterValue==='all'?' selected':''}>All Status</option>
+        <option value="pending"${taskFilterValue==='pending'?' selected':''}>Pending</option>
+        <option value="in-progress"${taskFilterValue==='in-progress'?' selected':''}>In Progress</option>
+        <option value="done"${taskFilterValue==='done'?' selected':''}>Done</option>
+      </select>
+      <select onchange="taskAssigneeFilter=this.value;render()" style="width:auto">
+        <option value="all"${taskAssigneeFilter==='all'?' selected':''}>All Assignees</option>
+        <option value="Rezah"${taskAssigneeFilter==='Rezah'?' selected':''}>Rezah</option>
+        <option value="Norman (AI)"${taskAssigneeFilter==='Norman (AI)'?' selected':''}>Norman (AI)</option>
+      </select>
+      <select onchange="taskCategoryFilter=this.value;render()" style="width:auto">
+        <option value="all"${taskCategoryFilter==='all'?' selected':''}>All Categories</option>
+        <option value="business"${taskCategoryFilter==='business'?' selected':''}>Business</option>
+        <option value="personal"${taskCategoryFilter==='personal'?' selected':''}>Personal</option>
+        <option value="health"${taskCategoryFilter==='health'?' selected':''}>Health</option>
+        <option value="family"${taskCategoryFilter==='family'?' selected':''}>Family</option>
+        <option value="spiritual"${taskCategoryFilter==='spiritual'?' selected':''}>Spiritual</option>
+      </select>
+      <select onchange="taskPriorityFilter=this.value;render()" style="width:auto">
+        <option value="all"${taskPriorityFilter==='all'?' selected':''}>All Priorities</option>
+        <option value="urgent"${taskPriorityFilter==='urgent'?' selected':''}>Urgent</option>
+        <option value="high"${taskPriorityFilter==='high'?' selected':''}>High</option>
+        <option value="medium"${taskPriorityFilter==='medium'?' selected':''}>Medium</option>
+        <option value="low"${taskPriorityFilter==='low'?' selected':''}>Low</option>
+      </select>
+      <select onchange="taskSortBy=this.value;render()" style="width:auto">
+        <option value="created"${taskSortBy==='created'?' selected':''}>Sort: Created</option>
+        <option value="due_date"${taskSortBy==='due_date'?' selected':''}>Sort: Due Date</option>
+        <option value="priority"${taskSortBy==='priority'?' selected':''}>Sort: Priority</option>
       </select>
     </div>
     <div id="taskList"></div>`;
-  const filtered=tasks.filter(t=>taskFilterValue==='all'||t.status===taskFilterValue);
+  let filtered=tasks.filter(t=>{
+    if(taskFilterValue!=='all'&&t.status!==taskFilterValue)return false;
+    if(taskAssigneeFilter!=='all'&&t.assignee!==taskAssigneeFilter)return false;
+    if(taskCategoryFilter!=='all'&&t.category!==taskCategoryFilter)return false;
+    if(taskPriorityFilter!=='all'&&t.priority!==taskPriorityFilter)return false;
+    return true;
+  });
+  filtered.sort((a,b)=>{
+    if(taskSortBy==='priority')return (priorityOrder[a.priority]??2)-(priorityOrder[b.priority]??2);
+    if(taskSortBy==='due_date'){
+      if(!a.due_date&&!b.due_date)return 0;
+      if(!a.due_date)return 1;if(!b.due_date)return -1;
+      return a.due_date.localeCompare(b.due_date);
+    }
+    return (Number(b.created)||0)-(Number(a.created)||0);
+  });
   document.getElementById('taskList').innerHTML=filtered.length?filtered.map(t=>`
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-size:.9rem">${esc(t.title)}</div>
-        <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${t.assignee?'Assigned: '+esc(t.assignee):''} ${t.created?'• '+new Date(Number(t.created)).toLocaleDateString():''}</div>
+    <div class="card" style="cursor:pointer" onclick="editTask('${t.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.9rem;font-weight:bold">${esc(t.title)}</div>
+          ${t.description?`<div class="task-desc">${esc(t.description)}</div>`:''}
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center">
+            <span class="badge ${t.status||'pending'}">${t.status||'pending'}</span>
+            ${t.priority?`<span class="badge ${t.priority}">${t.priority}</span>`:''}
+            ${t.category?`<span class="badge ${t.category}">${t.category}</span>`:''}
+            ${t.assignee?`<span class="badge" style="border-color:var(--dim);color:var(--dim)">${esc(t.assignee)}</span>`:''}
+            ${t.due_date?`<span class="${getDueClass(t.due_date)}" style="font-size:.7rem">📅 ${formatDueDate(t.due_date)}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0" onclick="event.stopPropagation()">
+          <select onchange="updateTaskStatus('${t.id}',this.value)" style="width:auto;font-size:.7rem;padding:2px 4px">
+            <option ${t.status==='pending'?'selected':''} value="pending">pending</option>
+            <option ${t.status==='in-progress'?'selected':''} value="in-progress">in-progress</option>
+            <option ${t.status==='done'?'selected':''} value="done">done</option>
+          </select>
+          <button class="edit-btn" onclick="editTask('${t.id}')">✎</button>
+          <button class="delete-btn" onclick="deleteItem('tasks','${t.id}')">✕</button>
+        </div>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <span class="badge ${t.status}">${t.status}</span>
-        <select onchange="updateTaskStatus('${t.id}',this.value)" style="width:auto;font-size:.7rem;padding:2px 4px">
-          <option ${t.status==='pending'?'selected':''} value="pending">pending</option>
-          <option ${t.status==='in-progress'?'selected':''} value="in-progress">in-progress</option>
-          <option ${t.status==='done'?'selected':''} value="done">done</option>
-        </select>
-        <button class="delete-btn" onclick="deleteItem('tasks','${t.id}')">✕</button>
-      </div>
-    </div>`).join(''):'<div class="empty">No tasks yet. Click + New Task to begin.</div>';
+    </div>`).join(''):'<div class="empty">No tasks match filters. Click + New Task to begin.</div>';
 }
 
-function addTask(){showModal('New Task',`
-  <div class="form-row"><label>Title</label><input id="mTitle"></div>
-  <div class="form-row"><label>Assignee</label><input id="mAssignee" value="Norman (AI)"></div>
-`,async()=>{
-  const id=uid(),title=document.getElementById('mTitle').value,assignee=document.getElementById('mAssignee').value;
-  await neonQuery('INSERT INTO tasks(id,title,assignee,status,created) VALUES($1,$2,$3,$4,$5)',[id,title,assignee,'pending',Date.now()]);
+function taskFormHTML(t){
+  t=t||{title:'',description:'',assignee:'Rezah',due_date:'',priority:'medium',category:'',status:'pending'};
+  return `
+  <div class="form-row"><label>Title *</label><input id="mTitle" value="${esc(t.title)}"></div>
+  <div class="form-row"><label>Description</label><textarea id="mDesc">${esc(t.description||'')}</textarea></div>
+  <div class="form-row"><label>Assignee</label><select id="mAssignee" style="width:100%">
+    <option value="Rezah"${t.assignee==='Rezah'?' selected':''}>Rezah</option>
+    <option value="Norman (AI)"${t.assignee==='Norman (AI)'?' selected':''}>Norman (AI)</option>
+  </select></div>
+  <div class="form-row"><label>Due Date</label><input id="mDueDate" type="date" value="${esc(t.due_date||'')}"></div>
+  <div class="form-row"><label>Priority</label><select id="mPriority" style="width:100%">
+    <option value="low"${t.priority==='low'?' selected':''}>Low</option>
+    <option value="medium"${(t.priority==='medium'||!t.priority)?' selected':''}>Medium</option>
+    <option value="high"${t.priority==='high'?' selected':''}>High</option>
+    <option value="urgent"${t.priority==='urgent'?' selected':''}>Urgent</option>
+  </select></div>
+  <div class="form-row"><label>Category</label><select id="mCategory" style="width:100%">
+    <option value="">— None —</option>
+    <option value="business"${t.category==='business'?' selected':''}>Business</option>
+    <option value="personal"${t.category==='personal'?' selected':''}>Personal</option>
+    <option value="health"${t.category==='health'?' selected':''}>Health</option>
+    <option value="family"${t.category==='family'?' selected':''}>Family</option>
+    <option value="spiritual"${t.category==='spiritual'?' selected':''}>Spiritual</option>
+  </select></div>
+  <div class="form-row"><label>Status</label><select id="mStatus" style="width:100%">
+    <option value="pending"${t.status==='pending'?' selected':''}>Pending</option>
+    <option value="in-progress"${t.status==='in-progress'?' selected':''}>In Progress</option>
+    <option value="done"${t.status==='done'?' selected':''}>Done</option>
+  </select></div>`;
+}
+
+function getTaskFormValues(){
+  return {
+    title:document.getElementById('mTitle').value,
+    description:document.getElementById('mDesc').value,
+    assignee:document.getElementById('mAssignee').value,
+    due_date:document.getElementById('mDueDate').value,
+    priority:document.getElementById('mPriority').value,
+    category:document.getElementById('mCategory').value,
+    status:document.getElementById('mStatus').value
+  };
+}
+
+function addTask(){showModal('New Task',taskFormHTML(),async()=>{
+  const v=getTaskFormValues();
+  if(!v.title){alert('Title is required');return;}
+  const id=uid();
+  await neonQuery('INSERT INTO tasks(id,title,assignee,status,created,due_date,priority,description,category) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+    [id,v.title,v.assignee,v.status,Date.now(),v.due_date,v.priority,v.description,v.category]);
   render();
 })}
+
+async function editTask(id){
+  const tasks=cache.tasks.length?cache.tasks:await loadFromDB('tasks');
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  showModal('Edit Task',taskFormHTML(t),async()=>{
+    const v=getTaskFormValues();
+    if(!v.title){alert('Title is required');return;}
+    await neonQuery('UPDATE tasks SET title=$1,description=$2,assignee=$3,due_date=$4,priority=$5,category=$6,status=$7 WHERE id=$8',
+      [v.title,v.description,v.assignee,v.due_date,v.priority,v.category,v.status,id]);
+    render();
+  });
+}
 
 async function updateTaskStatus(id,s){
   await neonQuery('UPDATE tasks SET status=$1 WHERE id=$2',[s,id]);
@@ -306,7 +457,7 @@ function buildCalDays(dow,dim,prevDim,entries,today){
     const dayEntries=entries.filter(e=>e.date===ds);
     html+=`<div class="cal-day${isToday?' today':''}" onclick="showDayEntries('${ds}')">
       <span class="num">${d}</span>
-      ${dayEntries.slice(0,2).map(e=>`<div class="cal-entry">${esc(e.title)}</div>`).join('')}
+      ${dayEntries.sort((a,b)=>(a.time||'').localeCompare(b.time||'')).slice(0,2).map(e=>`<div class="cal-entry">${e.time?esc(e.time)+' ':''}${esc(e.title)}</div>`).join('')}
       ${dayEntries.length>2?`<div class="cal-entry">+${dayEntries.length-2} more</div>`:''}
     </div>`;
   }
@@ -314,19 +465,72 @@ function buildCalDays(dow,dim,prevDim,entries,today){
   return html;
 }
 function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}render()}
-function addCalEntry(){showModal('New Calendar Entry',`
-  <div class="form-row"><label>Date</label><input id="mDate" type="date"></div>
-  <div class="form-row"><label>Title</label><input id="mETitle"></div>
-  <div class="form-row"><label>Description</label><textarea id="mEDesc"></textarea></div>
-`,async()=>{
+
+function calEntryFormHTML(e,prefillDate){
+  e=e||{date:prefillDate||'',time:'',title:'',description:'',category:''};
+  return `
+  <div class="form-row"><label>Date *</label><input id="mDate" type="date" value="${esc(e.date)}"></div>
+  <div class="form-row"><label>Time</label><input id="mTime" type="time" value="${esc(e.time||'')}"></div>
+  <div class="form-row"><label>Title *</label><input id="mETitle" value="${esc(e.title)}"></div>
+  <div class="form-row"><label>Description</label><textarea id="mEDesc">${esc(e.description||'')}</textarea></div>
+  <div class="form-row"><label>Category</label><select id="mECategory" style="width:100%">
+    <option value="">— None —</option>
+    <option value="meeting"${e.category==='meeting'?' selected':''}>Meeting</option>
+    <option value="deadline"${e.category==='deadline'?' selected':''}>Deadline</option>
+    <option value="personal"${e.category==='personal'?' selected':''}>Personal</option>
+    <option value="family"${e.category==='family'?' selected':''}>Family</option>
+    <option value="health"${e.category==='health'?' selected':''}>Health</option>
+    <option value="spiritual"${e.category==='spiritual'?' selected':''}>Spiritual</option>
+    <option value="business"${e.category==='business'?' selected':''}>Business</option>
+  </select></div>`;
+}
+
+function addCalEntry(prefillDate){showModal('New Calendar Entry',calEntryFormHTML(null,prefillDate),async()=>{
   const id=uid();
-  await neonQuery('INSERT INTO calendar_entries(id,date,title,description) VALUES($1,$2,$3,$4)',[id,document.getElementById('mDate').value,document.getElementById('mETitle').value,document.getElementById('mEDesc').value]);
+  const date=document.getElementById('mDate').value;
+  const title=document.getElementById('mETitle').value;
+  if(!date||!title){alert('Date and Title are required');return;}
+  await neonQuery('INSERT INTO calendar_entries(id,date,title,description,time,category) VALUES($1,$2,$3,$4,$5,$6)',
+    [id,date,title,document.getElementById('mEDesc').value,document.getElementById('mTime').value,document.getElementById('mECategory').value]);
   render();
 })}
+
+async function editCalEntry(id){
+  const entries=cache.calendar.length?cache.calendar:await loadFromDB('calendar');
+  const e=entries.find(x=>x.id===id);if(!e)return;
+  // Close existing modals
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.remove());
+  showModal('Edit Calendar Entry',calEntryFormHTML(e),async()=>{
+    const date=document.getElementById('mDate').value;
+    const title=document.getElementById('mETitle').value;
+    if(!date||!title){alert('Date and Title are required');return;}
+    await neonQuery('UPDATE calendar_entries SET date=$1,title=$2,description=$3,time=$4,category=$5 WHERE id=$6',
+      [date,title,document.getElementById('mEDesc').value,document.getElementById('mTime').value,document.getElementById('mECategory').value,id]);
+    render();
+  });
+}
+
 async function showDayEntries(ds){
   const entries=(await loadFromDB('calendar')).filter(e=>e.date===ds);
-  if(!entries.length)return;
-  showModal('Entries for '+ds,entries.map(e=>`<div class="card"><strong>${esc(e.title)}</strong><div style="font-size:.8rem;color:var(--dim);margin-top:4px">${esc(e.description||'')}</div><button class="delete-btn" style="margin-top:8px" onclick="deleteItem('calendar','${e.id}')">Delete</button></div>`).join(''),null);
+  if(!entries.length){
+    addCalEntry(ds);
+    return;
+  }
+  const sorted=entries.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  showModal('Entries for '+ds,
+    sorted.map(e=>`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <strong>${e.time?esc(e.time)+' — ':''}${esc(e.title)}</strong>
+          ${e.category?`<span class="badge ${e.category}" style="margin-left:8px">${e.category}</span>`:''}
+          ${e.description?`<div style="font-size:.8rem;color:var(--dim);margin-top:4px">${esc(e.description)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="edit-btn" onclick="editCalEntry('${e.id}')">✎</button>
+          <button class="delete-btn" onclick="deleteItem('calendar','${e.id}')">✕</button>
+        </div>
+      </div>
+    </div>`).join('')+`<div style="margin-top:12px"><button onclick="document.querySelectorAll('.modal-overlay').forEach(m=>m.remove());addCalEntry('${ds}')">+ Add Entry</button></div>`,null);
 }
 
 // ---- 3. PROMPTS ----
