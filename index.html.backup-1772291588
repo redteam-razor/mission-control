@@ -6,14 +6,14 @@
 <title>Mission Control</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--green:#00ff88;--dark-green:#009955;--bg:#0a0e14;--panel:#0d1218;--border:#1a3a3a;--dim:#6a9a8a;--glow:0 0 15px rgba(0,255,136,.4);--card-bg:rgba(13,18,24,.85);--accent:#00d4aa}
+:root{--green:#00ff41;--dark-green:#008f11;--bg:#0a0a0a;--panel:#0d1117;--border:#1a3a1a;--dim:#4a7a4a;--glow:0 0 10px rgba(0,255,65,.3)}
 body{font-family:'Courier New',monospace;background:var(--bg);color:var(--green);height:100vh;overflow:hidden;font-size:.85rem}
 canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.06}
 #app{position:relative;z-index:1;display:flex;height:100vh}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-#header{padding:20px 28px;border-bottom:2px solid var(--border);background:linear-gradient(135deg,rgba(10,14,20,.95),rgba(13,18,24,.95));backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,.4)}
-#header h1{font-size:1.5rem;text-shadow:var(--glow);letter-spacing:3px;background:linear-gradient(135deg,var(--green),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-#header .subtitle{color:var(--dim);font-size:.72rem;max-width:700px;line-height:1.6;margin-top:8px;font-weight:300}
+#header{padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.85);backdrop-filter:blur(8px)}
+#header h1{font-size:1.4rem;text-shadow:var(--glow);letter-spacing:2px}
+#header .subtitle{color:var(--dim);font-size:.7rem;max-width:600px;line-height:1.5;margin-top:6px}
 #content{flex:1;overflow-y:auto;padding:24px;background:rgba(10,10,10,.7)}
 #content::-webkit-scrollbar{width:6px}
 #content::-webkit-scrollbar-thumb{background:var(--dark-green);border-radius:3px}
@@ -23,13 +23,13 @@ canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;op
 .tab-btn.active{background:rgba(0,255,65,.12);color:var(--green);box-shadow:var(--glow)}
 .tab-icon{font-size:.85rem;font-family:'Courier New',monospace;font-weight:bold;color:inherit}
 .tab-label{font-size:.65rem;color:inherit;font-family:'Courier New',monospace}
-button,.btn{background:linear-gradient(135deg,rgba(0,153,85,.1),rgba(0,212,170,.05));color:var(--green);border:1px solid var(--dark-green);padding:9px 18px;font-family:inherit;font-size:.8rem;cursor:pointer;border-radius:6px;transition:all .25s;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
-button:hover,.btn:hover{background:linear-gradient(135deg,rgba(0,153,85,.2),rgba(0,212,170,.15));box-shadow:var(--glow),0 4px 12px rgba(0,0,0,.3);transform:translateY(-1px)}
+button,.btn{background:transparent;color:var(--green);border:1px solid var(--dark-green);padding:8px 16px;font-family:inherit;font-size:.8rem;cursor:pointer;border-radius:4px;transition:all .2s}
+button:hover,.btn:hover{background:rgba(0,255,65,.15);box-shadow:var(--glow)}
 input,textarea,select{background:rgba(0,255,65,.05);border:1px solid var(--border);color:var(--green);padding:8px 12px;font-family:inherit;font-size:.85rem;border-radius:4px;width:100%}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--dark-green);box-shadow:var(--glow)}
 textarea{resize:vertical;min-height:80px}
 select option{background:var(--bg);color:var(--green)}
-.card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.3),0 0 1px rgba(0,255,136,.1);transition:all .2s}.card:hover{border-color:var(--dark-green);box-shadow:0 6px 16px rgba(0,0,0,.4),var(--glow)}
+.card{background:rgba(13,17,23,.8);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;border:1px solid}
 .badge.pending{border-color:#ff6;color:#ff6}
 .badge.in-progress{border-color:#0af;color:#0af}
@@ -48,14 +48,6 @@ select option{background:var(--bg);color:var(--green)}
 .badge.spiritual{border-color:#ff6;color:#ff6}
 .badge.meeting{border-color:#0af;color:#0af}
 .badge.deadline{border-color:#f44;color:#f44}
-.badge.web{border-color:#0af;color:#0af}
-.badge.document{border-color:#a6f;color:#a6f}
-.badge.content{border-color:#ff6;color:#ff6}
-.badge.automation{border-color:#0f6;color:#0f6}
-.badge.system{border-color:#f90;color:#f90}
-.badge.deployed{border-color:#0f6;color:#0f6;font-weight:bold}
-.badge.complete{border-color:var(--green);color:var(--green)}
-.badge.active{border-color:#0af;color:#0af;animation:pulse 2s infinite}
 .due-overdue{color:#f44;font-weight:bold}
 .due-today{color:#ff6;font-weight:bold}
 .due-future{color:var(--dim)}
@@ -104,7 +96,6 @@ h2{font-size:1.1rem;margin-bottom:16px;text-shadow:var(--glow);letter-spacing:1p
 .radar-item .metrics{display:flex;gap:8px;flex-shrink:0;font-size:.7rem;color:var(--dim);margin-left:12px}
 .radar-tooltip{position:relative;cursor:help;color:var(--dim);font-size:.75rem;border-bottom:1px dashed var(--dim)}
 .radar-tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:0;background:var(--bg);border:1px solid var(--dark-green);padding:8px 12px;font-size:.7rem;color:var(--green);white-space:normal;width:280px;z-index:10;border-radius:4px;box-shadow:0 0 12px rgba(0,255,65,.15)}
-@keyframes pulse{0%,100%{box-shadow:0 0 5px rgba(0,175,255,.5)}50%{box-shadow:0 0 15px rgba(0,175,255,.8)}}
 @media(max-width:768px){
   #sidebar{width:56px}
   .tab-btn{width:44px;padding:6px 2px}
@@ -669,70 +660,44 @@ function addPrompt(){showModal('Log Prompt',`
 
 // ---- 4. DOCUMENTS ----
 let editingDoc=null;
-// ---- PROJECT DELIVERABLES DATA ----
-const PROJECTS = [
-  {name:"RazorEdge AI Landing Page",description:"Professional landing page for AI sandbox business",type:"web",status:"deployed",date:"2026-02-25",link:"https://razoredge-ai.vercel.app",local:null,tech:"HTML/CSS/JS + Vercel"},
-  {name:"Mission Control Dashboard",description:"Personal command center for tasks, calendar, and goals",type:"web",status:"deployed",date:"2026-02-25",link:"https://mission-control-redteam-razors-projects-50690806.vercel.app",local:"~/.openclaw/workspace/mission-control",tech:"HTML/CSS/JS + Neon DB + Vercel"},
-  {name:"Business Plan & Market Research",description:"Complete business strategy, target market analysis, and pricing",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/business/",tech:"Markdown"},
-  {name:"LinkedIn Content (5 Posts)",description:"Launch campaign content for RazorEdge AI",type:"content",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/content/linkedin-posts.md",tech:"Markdown"},
-  {name:"Client Outreach Templates",description:"Email templates for prospecting, follow-up, and closing",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/business/email-templates.md",tech:"Markdown"},
-  {name:"Cape Town Family Adventures",description:"52-week family outing planner with budget tracker",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/personal/cape-town-family-adventures.md",tech:"Markdown"},
-  {name:"12-Week Cycling Training Plan",description:"Progressive training plan for 150km event",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/personal/cycling-training-plan.md",tech:"Markdown"},
-  {name:"Family Meal Plan",description:"Halal meal planning with Cape Town local ingredients",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/personal/family-meal-plan.md",tech:"Markdown"},
-  {name:"Umrah Savings Tracker",description:"24-month savings plan for family pilgrimage",type:"document",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/personal/umrah-tracker.md",tech:"Markdown"},
-  {name:"Model Routing Plan",description:"AI cost optimization strategy (73% savings)",type:"document",status:"complete",date:"2026-02-28",link:null,local:"~/.openclaw/workspace/business/model-routing-plan.md",tech:"Markdown"},
-  {name:"Security Audit & Hardening",description:"OpenClaw security review and system hardening",type:"system",status:"complete",date:"2026-02-27",link:null,local:"~/.openclaw/workspace/memory/2026-02-27.md",tech:"System Config"},
-  {name:"Norman Daily Backup (Cron)",description:"Automated daily backup to GitHub",type:"automation",status:"active",date:"2026-02-27",link:"https://github.com/redteam-razor/norman-backup",local:"~/.openclaw/workspace/scripts/backup.sh",tech:"Bash + GitHub + Cron"}
-];
-
 async function renderDocuments(el){
-  el.innerHTML=`<h2><span class="section-icon">▣</span> PROJECT DELIVERABLES</h2>
-    <div class="toolbar">
-      <span style="font-size:.75rem;color:var(--dim)">${PROJECTS.length} projects completed</span>
-    </div>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:.8rem">
-        <thead>
-          <tr style="border-bottom:2px solid var(--border);text-align:left">
-            <th style="padding:10px 12px;color:var(--green)">Project</th>
-            <th style="padding:10px 12px;color:var(--green)">Type</th>
-            <th style="padding:10px 12px;color:var(--green)">Status</th>
-            <th style="padding:10px 12px;color:var(--green)">Date</th>
-            <th style="padding:10px 12px;color:var(--green)">Tech</th>
-            <th style="padding:10px 12px;color:var(--green)">Links</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${PROJECTS.map((p,i)=>`
-            <tr style="border-bottom:1px solid rgba(26,58,26,.3);${i%2===0?'background:rgba(0,255,65,.02)':''}">
-              <td style="padding:10px 12px">
-                <div style="font-weight:bold;color:var(--green)">${esc(p.name)}</div>
-                <div style="font-size:.7rem;color:var(--dim);margin-top:2px">${esc(p.description)}</div>
-              </td>
-              <td style="padding:10px 12px;font-size:.75rem"><span class="badge ${p.type}">${p.type}</span></td>
-              <td style="padding:10px 12px;font-size:.75rem"><span class="badge ${p.status}">${p.status}</span></td>
-              <td style="padding:10px 12px;font-size:.75rem;color:var(--dim)">${p.date}</td>
-              <td style="padding:10px 12px;font-size:.7rem;color:var(--dim)">${esc(p.tech)}</td>
-              <td style="padding:10px 12px;font-size:.75rem">
-                ${p.link?`<a href="${p.link}" target="_blank" style="color:var(--green);text-decoration:none;display:inline-block;margin-right:8px" title="View online">🌐 Web</a>`:''}
-                ${p.local?`<a href="#" onclick="alert('Local path: ${p.local}');return false" style="color:var(--green);text-decoration:none" title="${p.local}">📁 Local</a>`:''}
-                ${!p.link&&!p.local?'<span style="color:var(--dim)">—</span>':''}
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-    <div class="card" style="margin-top:20px;background:rgba(0,255,65,.05)">
-      <h3 style="font-size:.9rem;margin-bottom:8px;color:var(--green)">📊 Project Summary</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;font-size:.75rem">
-        <div><span style="color:var(--dim)">Web Apps:</span> <strong style="color:var(--green)">${PROJECTS.filter(p=>p.type==='web').length}</strong></div>
-        <div><span style="color:var(--dim)">Documents:</span> <strong style="color:var(--green)">${PROJECTS.filter(p=>p.type==='document').length}</strong></div>
-        <div><span style="color:var(--dim)">Content:</span> <strong style="color:var(--green)">${PROJECTS.filter(p=>p.type==='content').length}</strong></div>
-        <div><span style="color:var(--dim)">Automation:</span> <strong style="color:var(--green)">${PROJECTS.filter(p=>p.type==='automation').length}</strong></div>
-        <div><span style="color:var(--dim)">System:</span> <strong style="color:var(--green)">${PROJECTS.filter(p=>p.type==='system').length}</strong></div>
+  const docs=await loadFromDB('documents');
+  if(editingDoc){
+    const d=docs.find(x=>x.id===editingDoc)||{id:null,title:'',content:''};
+    el.innerHTML=`<h2><span class="section-icon">▣</span> ${d.id?'EDIT':'NEW'} DOCUMENT</h2>
+      <div class="form-row"><label>Title</label><input id="docTitle" value="${esc(d.title)}"></div>
+      <div class="form-row"><label>Content (Markdown)</label><textarea id="docContent" style="min-height:300px">${esc(d.content)}</textarea></div>
+      <div class="toolbar"><button onclick="saveDoc('${d.id}')">Save</button><button onclick="editingDoc=null;render()">Cancel</button></div>`;
+    return;
+  }
+  el.innerHTML=`<h2><span class="section-icon">▣</span> DOCUMENTS</h2>
+    <div class="toolbar"><button onclick="editingDoc='new';render()">+ New Document</button></div>
+    <div id="docList"></div>`;
+  document.getElementById('docList').innerHTML=docs.length?docs.map(d=>`
+    <div class="card" style="cursor:pointer" onclick="viewDoc('${d.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>${esc(d.title)}</strong>
+        <div style="display:flex;gap:6px">
+          <button onclick="event.stopPropagation();editingDoc='${d.id}';render()" style="font-size:.7rem;padding:4px 8px">Edit</button>
+          <button class="delete-btn" onclick="event.stopPropagation();deleteItem('documents','${d.id}')">✕</button>
+        </div>
       </div>
-    </div>`;
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">${new Date(Number(d.updated)).toLocaleDateString()} • ${(d.content||'').length} chars</div>
+    </div>`).join(''):'<div class="empty">No documents yet.</div>';
+}
+async function saveDoc(id){
+  const title=document.getElementById('docTitle').value,content=document.getElementById('docContent').value,now=Date.now();
+  if(id&&id!=='null'){
+    await neonQuery('UPDATE documents SET title=$1,content=$2,updated=$3 WHERE id=$4',[title,content,now,id]);
+  }else{
+    await neonQuery('INSERT INTO documents(id,title,content,created,updated) VALUES($1,$2,$3,$4,$5)',[uid(),title,content,now,now]);
+  }
+  editingDoc=null;render();
+}
+async function viewDoc(id){
+  const docs=await loadFromDB('documents');
+  const d=docs.find(x=>x.id===id);if(!d)return;
+  showModal(d.title,`<div style="white-space:pre-wrap;font-size:.85rem;line-height:1.6">${esc(d.content)}</div>`,null);
 }
 
 // ---- 5. CONTENT ----
