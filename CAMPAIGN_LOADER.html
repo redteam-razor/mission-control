@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Sandbox Campaign Loader</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:800px;margin:50px auto;padding:20px;background:#0a0e14;color:#00ff88}
+h1{color:#00ff88;text-align:center}
+.btn{background:#009955;color:#fff;border:none;padding:15px 30px;font-size:16px;cursor:pointer;border-radius:5px;margin:10px;font-weight:bold}
+.btn:hover{background:#00d4aa}
+.btn:disabled{background:#333;cursor:not-allowed}
+#log{background:#0d1218;border:1px solid#1a3a3a;padding:20px;margin-top:20px;border-radius:8px;min-height:400px;font-family:'Courier New',monospace;font-size:14px;line-height:1.6;overflow-y:auto;max-height:600px}
+.success{color:#0f6}
+.error{color:#f66}
+.warning{color:#ff6}
+.info{color:#0af}
+.controls{text-align:center;margin:30px 0}
+</style>
+</head>
+<body>
+<h1>🚀 AI Sandbox Promotor Campaign Loader</h1>
+<p style="text-align:center;color:#6a9a8a">Load 90-day campaign into Mission Control (70+ tasks + 40+ calendar events)</p>
+
+<div class="controls">
+  <button class="btn" onclick="loadCampaign()" id="loadBtn">Load Campaign Data</button>
+  <button class="btn" onclick="clearLog()">Clear Log</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+const API_URL = '/api/db';
+let logEl;
+
+function log(msg, type='info') {
+  if(!logEl) logEl = document.getElementById('log');
+  const className = type || 'info';
+  logEl.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('log').innerHTML = '';
+}
+
+async function neonQuery(query, params = []) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, params })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Query failed');
+  return data.rows;
+}
+
+async function loadCampaign() {
+  const btn = document.getElementById('loadBtn');
+  btn.disabled = true;
+  clearLog();
+  
+  log('🚀 Starting AI Sandbox Promotor Campaign load...', 'info');
+  log('', 'info');
+
+  try {
+    // Clear existing campaign data
+    log('📋 Clearing old campaign data...', 'warning');
+    await neonQuery("DELETE FROM tasks WHERE id LIKE 't-%'");
+    await neonQuery("DELETE FROM calendar_entries WHERE id LIKE 'c-%'");
+    log('✅ Old data cleared', 'success');
+    log('', 'info');
+
+    // Load Tasks
+    log('📥 Loading 70+ tasks...', 'info');
+    
+    const tasks = [
+      // TRAFFIC
+      {id:'t-traffic-001',title:'Identify 10 AI/Tech podcasts',assignee:'Reez',status:'pending',due_date:'2026-03-05',priority:'high',description:'Research SA podcasts, global AI podcasts, fintech shows',category:'business'},
+      {id:'t-traffic-002',title:'Draft podcast pitch template',assignee:'Reez',status:'pending',due_date:'2026-03-06',priority:'high',description:'Create compelling pitch with bio, value prop, talking points',category:'business'},
+      {id:'t-traffic-003',title:'Pitch 3 podcasts (Week 1)',assignee:'Reez',status:'pending',due_date:'2026-03-08',priority:'high',description:'Send personalized pitches, follow up after 3 days',category:'business'},
+      {id:'t-traffic-004',title:'Create guest post topics list',assignee:'Reez',status:'pending',due_date:'2026-03-07',priority:'medium',description:'10 article ideas for Medium, Dev.to, TechCentral',category:'content'},
+      {id:'t-traffic-005',title:'Identify 5 publications',assignee:'Reez',status:'pending',due_date:'2026-03-08',priority:'medium',description:'Target: Medium, Dev.to, TechCentral, MyBroadband, BusinessTech',category:'content'},
+      {id:'t-traffic-006',title:'Write guest post #1',assignee:'Reez',status:'pending',due_date:'2026-03-12',priority:'high',description:'1500-2000 words, include sandbox case study',category:'content'},
+      {id:'t-traffic-007',title:'Pitch 3 more podcasts',assignee:'Reez',status:'pending',due_date:'2026-03-15',priority:'high',description:'Continue podcast outreach campaign',category:'business'},
+      {id:'t-traffic-008',title:'Research Cape Town meetups',assignee:'Reez',status:'pending',due_date:'2026-03-14',priority:'medium',description:'Silicon Cape, StartupGrind, AI/ML meetups',category:'business'},
+      {id:'t-traffic-009',title:'Register for 2 networking events',assignee:'Reez',status:'pending',due_date:'2026-03-16',priority:'medium',description:'Secure spots, prep elevator pitch',category:'business'},
+      {id:'t-traffic-010',title:'Create 30-day LinkedIn calendar',assignee:'Reez',status:'pending',due_date:'2026-03-20',priority:'high',description:'Plan posts: 3x/week value, 1x/week product tease',category:'content'},
+      {id:'t-traffic-011',title:'Write 12 LinkedIn posts (batch)',assignee:'Reez',status:'pending',due_date:'2026-03-22',priority:'high',description:'AI adoption stories, automation wins, OpenClaw tips',category:'content'},
+      {id:'t-traffic-012',title:'Create 5 X/Twitter threads',assignee:'Reez',status:'pending',due_date:'2026-03-25',priority:'medium',description:'AI for finance pros, automation ROI, side hustle AI',category:'content'},
+      {id:'t-traffic-013',title:'Design social media graphics',assignee:'Reez',status:'pending',due_date:'2026-03-27',priority:'medium',description:'10 quote cards, 5 product screenshots, 3 testimonials',category:'content'},
+      {id:'t-traffic-014',title:'Research Facebook/Meta ads',assignee:'Reez',status:'pending',due_date:'2026-04-02',priority:'high',description:'Study competitors, ad formats, targeting. Budget: R2000',category:'business'},
+      {id:'t-traffic-015',title:'Create Meta ads landing page',assignee:'Reez',status:'pending',due_date:'2026-04-05',priority:'high',description:'Dedicated page with clear CTA, lead magnet signup',category:'web'},
+      {id:'t-traffic-016',title:'Write 5 Meta ad variations',assignee:'Reez',status:'pending',due_date:'2026-04-07',priority:'medium',description:'Headlines + body for different audiences',category:'content'},
+      {id:'t-traffic-017',title:'Design 3 Meta ad creatives',assignee:'Reez',status:'pending',due_date:'2026-04-08',priority:'medium',description:'Product shots, benefits, testimonials',category:'content'},
+      {id:'t-traffic-018',title:'Launch Meta ad campaign',assignee:'Reez',status:'pending',due_date:'2026-04-10',priority:'high',description:'Test 3 audiences. Track CPL. Budget: R2000',category:'business'},
+      {id:'t-traffic-019',title:'Monitor & optimize ads',assignee:'Reez',status:'pending',due_date:'2026-04-17',priority:'high',description:'Check daily, pause losers, scale winners',category:'business'},
+      
+      // HOLDING PATTERN
+      {id:'t-hold-001',title:'Set up email platform',assignee:'Reez',status:'pending',due_date:'2026-03-04',priority:'urgent',description:'ConvertKit/Mailchimp free tier, POPIA compliance',category:'automation'},
+      {id:'t-hold-002',title:'Create lead magnet PDF',assignee:'Reez',status:'pending',due_date:'2026-03-09',priority:'high',description:'AI Automation Starter Kit: 10 no-code automations',category:'content'},
+      {id:'t-hold-003',title:'Design newsletter template',assignee:'Reez',status:'pending',due_date:'2026-03-10',priority:'medium',description:'Professional design, clear branding, mobile-responsive',category:'content'},
+      {id:'t-hold-004',title:'Write welcome email sequence',assignee:'Reez',status:'pending',due_date:'2026-03-13',priority:'high',description:'5 emails: Welcome + lead magnet + value + soft pitch',category:'content'},
+      {id:'t-hold-005',title:'Write Newsletter #1',assignee:'Reez',status:'pending',due_date:'2026-03-20',priority:'high',description:'Why Every SMB Needs AI in 2026',category:'content'},
+      {id:'t-hold-006',title:'Send Newsletter #1',assignee:'Reez',status:'pending',due_date:'2026-03-21',priority:'high',description:'Thursday 10am SAST',category:'business'},
+      {id:'t-hold-007',title:'Newsletter #2',assignee:'Reez',status:'pending',due_date:'2026-03-28',priority:'medium',description:'3 AI Wins from Cape Town Businesses',category:'content'},
+      {id:'t-hold-008',title:'Newsletter #3',assignee:'Reez',status:'pending',due_date:'2026-04-04',priority:'medium',description:'Automate Without Code: Beginner Guide',category:'content'},
+      {id:'t-hold-009',title:'Newsletter #4',assignee:'Reez',status:'pending',due_date:'2026-04-11',priority:'medium',description:'AI Sandbox Deep Dive',category:'content'},
+      {id:'t-hold-010',title:'Newsletter #5',assignee:'Reez',status:'pending',due_date:'2026-04-18',priority:'high',description:'Customer Spotlight + Webinar Invite',category:'content'},
+      {id:'t-hold-011',title:'Record YouTube #1',assignee:'Reez',status:'pending',due_date:'2026-03-23',priority:'medium',description:'Unboxing the AI Sandbox (10-15 min)',category:'content'},
+      {id:'t-hold-012',title:'Edit & publish YouTube #1',assignee:'Reez',status:'pending',due_date:'2026-03-24',priority:'medium',description:'Add captions, thumbnail, description with links',category:'content'},
+      {id:'t-hold-013',title:'Record YouTube #2',assignee:'Reez',status:'pending',due_date:'2026-03-30',priority:'medium',description:'Build Your First AI Agent',category:'content'},
+      
+      // SELLING EVENT
+      {id:'t-sell-001',title:'Choose webinar platform',assignee:'Reez',status:'pending',due_date:'2026-03-22',priority:'high',description:'Test Zoom/StreamYard features, practice run',category:'automation'},
+      {id:'t-sell-002',title:'Create webinar topic',assignee:'Reez',status:'pending',due_date:'2026-03-23',priority:'high',description:'AI Automation Masterclass for SMBs (60 min)',category:'content'},
+      {id:'t-sell-003',title:'Design webinar slide deck',assignee:'Reez',status:'pending',due_date:'2026-04-01',priority:'high',description:'30-40 slides: Problem, Solution, Demo, Offer',category:'content'},
+      {id:'t-sell-004',title:'Create registration page',assignee:'Reez',status:'pending',due_date:'2026-04-02',priority:'urgent',description:'Landing page with value prop, date/time, register CTA',category:'web'},
+      {id:'t-sell-005',title:'Set up webinar automation',assignee:'Reez',status:'pending',due_date:'2026-04-03',priority:'high',description:'Confirmation, 1-day reminder, 1-hour reminder, replay',category:'automation'},
+      {id:'t-sell-006',title:'Webinar promo email #1',assignee:'Reez',status:'pending',due_date:'2026-04-04',priority:'high',description:'Announce to entire list: April 24 event',category:'content'},
+      {id:'t-sell-007',title:'Create webinar promo posts',assignee:'Reez',status:'pending',due_date:'2026-04-05',priority:'medium',description:'5 posts for LinkedIn, X, countdown, benefits',category:'content'},
+      {id:'t-sell-008',title:'Set up retargeting ads',assignee:'Reez',status:'pending',due_date:'2026-04-10',priority:'medium',description:'Retarget website visitors. Budget: R1500',category:'business'},
+      {id:'t-sell-009',title:'Webinar promo email #2',assignee:'Reez',status:'pending',due_date:'2026-04-17',priority:'high',description:'Last chance reminder with testimonials',category:'content'},
+      {id:'t-sell-010',title:'Daily countdown posts',assignee:'Reez',status:'pending',due_date:'2026-04-21',priority:'high',description:'7 days of countdown across platforms',category:'content'},
+      {id:'t-sell-011',title:'Webinar dry run',assignee:'Reez',status:'pending',due_date:'2026-04-23',priority:'urgent',description:'Test slides, audio, screen share, recording',category:'system'},
+      {id:'t-sell-012',title:'Send 24hr reminder',assignee:'Reez',status:'pending',due_date:'2026-04-23',priority:'high',description:'Reminder + add to calendar link',category:'content'},
+      {id:'t-sell-013',title:'WEBINAR: AI Automation Masterclass',assignee:'Reez',status:'pending',due_date:'2026-04-24',priority:'urgent',description:'Live 7pm SAST. 90 min. Pitch at end',category:'meeting'},
+      {id:'t-sell-014',title:'Send replay + offer',assignee:'Reez',status:'pending',due_date:'2026-04-25',priority:'urgent',description:'Within 24hrs: replay, slides, 20% off',category:'content'},
+      {id:'t-sell-015',title:'Email Day 1: Replay',assignee:'Reez',status:'pending',due_date:'2026-04-25',priority:'high',description:'Replay + special offer',category:'content'},
+      {id:'t-sell-016',title:'Email Day 3: Case study',assignee:'Reez',status:'pending',due_date:'2026-04-27',priority:'high',description:'Social proof + offer reminder (48hrs left)',category:'content'},
+      {id:'t-sell-017',title:'Email Day 5: Final call',assignee:'Reez',status:'pending',due_date:'2026-04-29',priority:'high',description:'Last chance + bonus (free setup call)',category:'content'},
+      {id:'t-sell-018',title:'Email Day 7: Closes',assignee:'Reez',status:'pending',due_date:'2026-05-01',priority:'high',description:'Final deadline, FOMO, remove discount',category:'content'},
+      {id:'t-sell-019',title:'List 20 warm contacts',assignee:'Reez',status:'pending',due_date:'2026-03-25',priority:'high',description:'Allan Gray network: interested people, decision-makers',category:'business'},
+      {id:'t-sell-020',title:'Personalized outreach',assignee:'Reez',status:'pending',due_date:'2026-04-05',priority:'high',description:'WhatsApp/email: personal webinar invites',category:'business'},
+      
+      // OUTCOMES
+      {id:'t-outcome-001',title:'Set up conversion tracking',assignee:'Reez',status:'pending',due_date:'2026-03-08',priority:'high',description:'GA4 + sheet: visits, signups, registrations, purchases',category:'automation'},
+      {id:'t-outcome-002',title:'Create sales dashboard',assignee:'Reez',status:'pending',due_date:'2026-03-20',priority:'medium',description:'Google Sheets: traffic, conversion rates, revenue, CAC',category:'automation'},
+      {id:'t-outcome-003',title:'Monitor webinar conversion',assignee:'Reez',status:'pending',due_date:'2026-04-26',priority:'urgent',description:'Calculate: registrations → attendees → purchases',category:'business'},
+      {id:'t-outcome-004',title:'Follow up non-purchasers',assignee:'Reez',status:'pending',due_date:'2026-05-02',priority:'high',description:'Survey: why not buy? Objections → improve offer',category:'business'},
+      {id:'t-outcome-005',title:'Onboard new customers',assignee:'Reez',status:'pending',due_date:'2026-04-26',priority:'urgent',description:'Welcome call, setup assistance, first automation',category:'business'},
+      {id:'t-outcome-006',title:'Customer success check-in',assignee:'Reez',status:'pending',due_date:'2026-05-03',priority:'high',description:'Issues? Collect testimonial if happy',category:'business'},
+      {id:'t-outcome-007',title:'Request testimonials',assignee:'Reez',status:'pending',due_date:'2026-05-10',priority:'medium',description:'Video or written, use in next campaign',category:'content'},
+      {id:'t-outcome-008',title:'Segment non-converters',assignee:'Reez',status:'pending',due_date:'2026-05-03',priority:'medium',description:'Hot/Warm/Cold by engagement level',category:'business'},
+      {id:'t-outcome-009',title:'Create nurture sequence',assignee:'Reez',status:'pending',due_date:'2026-05-04',priority:'high',description:'For Hot leads: more case studies, address objections',category:'content'},
+      {id:'t-outcome-010',title:'Plan Webinar #2',assignee:'Reez',status:'pending',due_date:'2026-05-15',priority:'medium',description:'June event: AI Agents for Financial Services',category:'business'},
+      {id:'t-outcome-011',title:'Week 4 review',assignee:'Reez',status:'pending',due_date:'2026-03-31',priority:'medium',description:'Traffic, email rates, social engagement',category:'business'},
+      {id:'t-outcome-012',title:'Week 8 review',assignee:'Reez',status:'pending',due_date:'2026-04-30',priority:'high',description:'Full funnel: traffic → leads → webinar → sales',category:'business'},
+      {id:'t-outcome-013',title:'Week 12 retrospective',assignee:'Reez',status:'pending',due_date:'2026-05-30',priority:'high',description:'What worked? What flopped? Document learnings',category:'business'}
+    ];
+
+    let taskCount = 0;
+    for (const t of tasks) {
+      await neonQuery(
+        'INSERT INTO tasks(id,title,assignee,status,created,due_date,priority,description,category) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+        [t.id, t.title, t.assignee, t.status, Date.now(), t.due_date, t.priority, t.description, t.category]
+      );
+      taskCount++;
+      if(taskCount % 10 === 0) log(`  ... ${taskCount} tasks loaded`, 'info');
+    }
+    log(`✅ Loaded ${tasks.length} tasks`, 'success');
+    log('', 'info');
+
+    // Load Calendar
+    log('📅 Loading 40+ calendar entries...', 'info');
+    
+    const cal = [
+      {id:'c-001',date:'2026-03-06',title:'Podcast Pitch Deadline',description:'Send pitches to 3 podcasts',time:'09:00',category:'deadline'},
+      {id:'c-002',date:'2026-03-10',title:'Guest Post #1 Draft',description:'Complete first guest article',time:'EOD',category:'deadline'},
+      {id:'c-003',date:'2026-03-13',title:'Newsletter Sequence Live',description:'Activate automated email sequence',time:'10:00',category:'system'},
+      {id:'c-004',date:'2026-03-21',title:'Newsletter #1: Send',description:'First newsletter to list',time:'10:00',category:'content'},
+      {id:'c-005',date:'2026-03-23',title:'YouTube #1: Record',description:'Unboxing AI Sandbox',time:'14:00',category:'content'},
+      {id:'c-006',date:'2026-03-28',title:'Newsletter #2: Send',description:'Weekly newsletter',time:'10:00',category:'content'},
+      {id:'c-007',date:'2026-04-01',title:'Webinar Planning Kickoff',description:'Start slide deck + registration page',time:'09:00',category:'meeting'},
+      {id:'c-008',date:'2026-04-04',title:'Newsletter #3: Send',description:'Weekly newsletter',time:'10:00',category:'content'},
+      {id:'c-009',date:'2026-04-04',title:'Webinar Promo Email #1',description:'Announce webinar',time:'11:00',category:'content'},
+      {id:'c-010',date:'2026-04-10',title:'Meta Ads Launch',description:'Go live with paid traffic',time:'08:00',category:'business'},
+      {id:'c-011',date:'2026-04-11',title:'Newsletter #4: Send',description:'Weekly newsletter',time:'10:00',category:'content'},
+      {id:'c-012',date:'2026-04-17',title:'Webinar Promo Email #2',description:'1-week reminder',time:'10:00',category:'content'},
+      {id:'c-013',date:'2026-04-18',title:'Newsletter #5: Send',description:'Newsletter + webinar invite',time:'10:00',category:'content'},
+      {id:'c-014',date:'2026-04-23',title:'Webinar Tech Check',description:'Dry run + equipment test',time:'18:00',category:'meeting'},
+      {id:'c-015',date:'2026-04-23',title:'24-Hour Reminder',description:'Send reminder to registrants',time:'19:00',category:'content'},
+      {id:'c-016',date:'2026-04-24',title:'🎯 WEBINAR: AI Automation Masterclass',description:'Live event (90 min)',time:'19:00',category:'meeting'},
+      {id:'c-017',date:'2026-04-25',title:'Post-Webinar Email #1',description:'Replay + special offer',time:'09:00',category:'content'},
+      {id:'c-018',date:'2026-04-27',title:'Post-Webinar Email #2',description:'Case study + offer reminder',time:'10:00',category:'content'},
+      {id:'c-019',date:'2026-04-29',title:'Post-Webinar Email #3',description:'Final call + bonus',time:'10:00',category:'content'},
+      {id:'c-020',date:'2026-05-01',title:'Post-Webinar Email #4',description:'Offer closes today',time:'09:00',category:'deadline'},
+      {id:'c-021',date:'2026-05-03',title:'Customer Success Calls',description:'Call new customers',time:'14:00',category:'meeting'},
+      {id:'c-022',date:'2026-05-15',title:'Plan Webinar #2',description:'Start planning June webinar',time:'10:00',category:'meeting'},
+      {id:'c-023',date:'2026-05-30',title:'Campaign Retrospective',description:'90-day review + learnings',time:'15:00',category:'meeting'},
+      {id:'c-024',date:'2026-03-31',title:'Month 1 Milestone',description:'Review traffic, list growth, content',time:'EOD',category:'business'},
+      {id:'c-025',date:'2026-04-30',title:'Month 2 Milestone',description:'Review webinar, first sales, conversion',time:'EOD',category:'business'},
+      {id:'c-026',date:'2026-05-31',title:'Month 3 Milestone',description:'Review ROI, feedback, scale plan',time:'EOD',category:'business'},
+      {id:'c-027',date:'2026-03-19',title:'Silicon Cape Meetup',description:'Network + pitch (TBC)',time:'18:00',category:'meeting'},
+      {id:'c-028',date:'2026-04-16',title:'StartupGrind Cape Town',description:'Attend + connect (TBC)',time:'18:30',category:'meeting'},
+      {id:'c-029',date:'2026-03-15',title:'Content Batch: LinkedIn',description:'Write 2 weeks of posts',time:'09:00-13:00',category:'content'},
+      {id:'c-030',date:'2026-03-22',title:'Content Batch: Twitter',description:'Write 5 threads',time:'09:00-12:00',category:'content'},
+      {id:'c-031',date:'2026-04-05',title:'Content Batch: Webinar Promos',description:'Create all promo materials',time:'09:00-14:00',category:'content'},
+      {id:'c-032',date:'2026-03-07',title:'Week 1 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-033',date:'2026-03-14',title:'Week 2 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-034',date:'2026-03-21',title:'Week 3 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-035',date:'2026-03-28',title:'Week 4 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-036',date:'2026-04-04',title:'Week 5 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-037',date:'2026-04-11',title:'Week 6 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-038',date:'2026-04-18',title:'Week 7 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-039',date:'2026-04-25',title:'Week 8 + Webinar Debrief',description:'Deep dive on performance',time:'16:00',category:'meeting'},
+      {id:'c-040',date:'2026-05-02',title:'Week 9 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-041',date:'2026-05-09',title:'Week 10 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-042',date:'2026-05-16',title:'Week 11 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'},
+      {id:'c-043',date:'2026-05-23',title:'Week 12 Review',description:'Check progress, adjust priorities',time:'16:00',category:'meeting'}
+    ];
+
+    let calCount = 0;
+    for (const e of cal) {
+      await neonQuery(
+        'INSERT INTO calendar_entries(id,date,title,description,time,category) VALUES($1,$2,$3,$4,$5,$6)',
+        [e.id, e.date, e.title, e.description, e.time, e.category]
+      );
+      calCount++;
+      if(calCount % 10 === 0) log(`  ... ${calCount} calendar entries loaded`, 'info');
+    }
+    log(`✅ Loaded ${cal.length} calendar entries`, 'success');
+    log('', 'info');
+
+    log('════════════════════════════════════════════', 'success');
+    log('🎉 CAMPAIGN LOADED SUCCESSFULLY!', 'success');
+    log('════════════════════════════════════════════', 'success');
+    log('', 'info');
+    log('📊 Summary:', 'info');
+    log(`   ✓ ${tasks.length} tasks created`, 'success');
+    log(`   ✓ ${cal.length} calendar events scheduled`, 'success');
+    log(`   ✓ Campaign: 90 days (Mar 1 - May 31, 2026)`, 'success');
+    log(`   ✓ Webinar: April 24, 2026 @ 7pm SAST`, 'success');
+    log('', 'info');
+    log('🚀 Next steps:', 'warning');
+    log('   1. Refresh Mission Control (press F5)', 'info');
+    log('   2. Go to Tasks tab → filter by priority', 'info');
+    log('   3. Go to Calendar tab → view upcoming events', 'info');
+    log('   4. Start with urgent/high-priority tasks!', 'info');
+    log('', 'info');
+    log('💡 Framework: JIcecream Promotor Blueprint', 'info');
+    log('   Step 1: Traffic (organic + paid)', 'info');
+    log('   Step 2: Holding Pattern (newsletter, content)', 'info');
+    log('   Step 3: Selling Event (webinar April 24)', 'info');
+    log('   Step 4: Outcomes (convert + loop back)', 'info');
+    
+  } catch (error) {
+    log('', 'info');
+    log('❌ ERROR:', 'error');
+    log(error.message, 'error');
+    log(error.stack, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
