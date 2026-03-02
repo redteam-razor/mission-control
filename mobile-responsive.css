@@ -1,0 +1,292 @@
+/* MISSION CONTROL - MOBILE RESPONSIVE CSS */
+/* Add to index.html in <head> after main styles */
+
+@media (max-width: 768px) {
+    /* General layout */
+    body {
+        font-size: 0.85rem;
+    }
+    
+    #app {
+        flex-direction: column;
+    }
+    
+    #sidebar {
+        width: 100%;
+        order: 2;
+        flex-direction: row;
+        height: 60px;
+        padding: 0;
+        justify-content: space-around;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1001;
+        border-right: none;
+        border-top: 1px solid var(--border);
+    }
+    
+    .tab-btn {
+        width: auto;
+        flex: 1;
+        padding: 8px 4px;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+    
+    .tab-icon {
+        font-size: 1.2rem;
+    }
+    
+    .tab-label {
+        font-size: 0.6rem;
+    }
+    
+    #main {
+        order: 1;
+        padding-bottom: 70px; /* Space for bottom nav */
+    }
+    
+    #header {
+        padding: 12px 16px;
+    }
+    
+    #header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .subtitle {
+        font-size: 0.65rem;
+    }
+    
+    #content {
+        padding: 12px;
+    }
+    
+    .container {
+        padding: 0 12px;
+    }
+    
+    /* Cards */
+    .card {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    /* Toolbar */
+    .toolbar {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .toolbar button {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* Filters */
+    .toolbar select {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    /* Tasks */
+    .task-desc {
+        font-size: 0.75rem;
+        max-height: 2em;
+    }
+    
+    .badge {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+    
+    .edit-btn,
+    .delete-btn {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    
+    /* Calendar - Month View */
+    .cal-grid {
+        gap: 1px;
+        font-size: 0.7rem;
+    }
+    
+    .cal-header {
+        padding: 4px 2px;
+        font-size: 0.65rem;
+    }
+    
+    .cal-day {
+        min-height: 50px;
+        padding: 2px;
+    }
+    
+    .cal-day .num {
+        font-size: 0.7rem;
+    }
+    
+    .cal-entry {
+        font-size: 0.5rem;
+        padding: 1px 3px;
+        margin-top: 1px;
+    }
+    
+    /* Modal */
+    .modal {
+        width: 95%;
+        max-width: 95%;
+        padding: 16px;
+        max-height: 90vh;
+    }
+    
+    .modal h3 {
+        font-size: 1rem;
+    }
+    
+    .form-row {
+        margin-bottom: 10px;
+    }
+    
+    .form-row label {
+        font-size: 0.75rem;
+    }
+    
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    /* Stats in Radar */
+    .radar-stat {
+        padding: 10px 12px;
+        min-width: 80px;
+    }
+    
+    .radar-stat .val {
+        font-size: 1.2rem;
+    }
+    
+    .radar-stat .lbl {
+        font-size: 0.6rem;
+    }
+    
+    /* Section titles */
+    h2 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    /* Search/Filter inputs */
+    input[type="text"],
+    input[type="search"] {
+        font-size: 0.85rem;
+    }
+    
+    /* Footer */
+    .footer-bottom {
+        font-size: 0.65rem;
+    }
+    
+    /* Calendar view switcher */
+    .calendar-view-switcher {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-top: 8px;
+    }
+    
+    .calendar-view-switcher button {
+        flex: 1;
+        font-size: 0.75rem;
+        padding: 8px 4px;
+    }
+    
+    /* Week view on mobile */
+    .week-view-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+    }
+    
+    /* Day view on mobile */
+    .day-view-container {
+        padding: 0.5rem;
+    }
+    
+    /* Hide less important elements on mobile */
+    .section-icon {
+        display: none;
+    }
+    
+    /* Make buttons touch-friendly */
+    button,
+    .btn {
+        min-height: 38px;
+        min-width: 38px;
+    }
+    
+    /* Toast notifications */
+    .toast-notification {
+        bottom: 70px !important; /* Above bottom nav */
+        right: 10px !important;
+        left: 10px !important;
+        max-width: none;
+        font-size: 0.85rem;
+    }
+}
+
+/* iPhone specific fixes */
+@media (max-width: 428px) {
+    /* iPhone 14 Pro Max and similar */
+    #header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .cal-day {
+        min-height: 45px;
+    }
+    
+    .toolbar {
+        font-size: 0.7rem;
+    }
+    
+    /* Ensure tap targets are large enough */
+    .tab-btn {
+        min-height: 44px;
+    }
+    
+    button {
+        min-height: 44px;
+    }
+}
+
+/* Landscape orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    #sidebar {
+        width: 60px;
+        height: 100%;
+        flex-direction: column;
+        order: -1;
+        position: static;
+        border-right: 1px solid var(--border);
+        border-top: none;
+    }
+    
+    .tab-btn {
+        width: 56px;
+        height: auto;
+        flex-direction: column;
+    }
+    
+    #main {
+        padding-bottom: 0;
+    }
+    
+    .toast-notification {
+        bottom: 20px !important;
+    }
+}
