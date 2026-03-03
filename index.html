@@ -516,7 +516,9 @@ function addTask(){showModal('New Task',taskFormHTML(),async()=>{
   const id=uid();
   await neonQuery('INSERT INTO tasks(id,title,assignee,status,created,due_date,priority,description,category) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',
     [id,v.title,v.assignee,v.status,Date.now(),v.due_date,v.priority,v.description,v.category]);
-  render();
+  cache.tasks=[];  // Clear cache to force fresh data
+  cache.calendar=[];  // Clear calendar cache too (tasks show on calendar)
+  await render();
 })}
 
 async function editTask(id){
@@ -527,13 +529,17 @@ async function editTask(id){
     if(!v.title){alert('Title is required');return;}
     await neonQuery('UPDATE tasks SET title=$1,description=$2,assignee=$3,due_date=$4,priority=$5,category=$6,status=$7 WHERE id=$8',
       [v.title,v.description,v.assignee,v.due_date,v.priority,v.category,v.status,id]);
-    render();
+    cache.tasks=[];  // Clear cache to force fresh data
+    cache.calendar=[];  // Clear calendar cache too
+    await render();
   });
 }
 
 async function updateTaskStatus(id,s){
   await neonQuery('UPDATE tasks SET status=$1 WHERE id=$2',[s,id]);
-  render();
+  cache.tasks=[];  // Clear cache to force fresh data
+  cache.calendar=[];  // Clear calendar cache too
+  await render();
 }
 
 // ---- 2. CALENDAR ----
@@ -600,7 +606,9 @@ function addCalEntry(prefillDate){showModal('New Calendar Entry',calEntryFormHTM
   if(!date||!title){alert('Date and Title are required');return;}
   await neonQuery('INSERT INTO calendar_entries(id,date,title,description,time,category) VALUES($1,$2,$3,$4,$5,$6)',
     [id,date,title,document.getElementById('mEDesc').value,document.getElementById('mTime').value,document.getElementById('mECategory').value]);
-  render();
+  cache.calendar=[];  // Clear cache to force fresh data
+  cache.tasks=[];  // Clear task cache too
+  await render();
 })}
 
 async function editCalEntry(id){
@@ -614,7 +622,9 @@ async function editCalEntry(id){
     if(!date||!title){alert('Date and Title are required');return;}
     await neonQuery('UPDATE calendar_entries SET date=$1,title=$2,description=$3,time=$4,category=$5 WHERE id=$6',
       [date,title,document.getElementById('mEDesc').value,document.getElementById('mTime').value,document.getElementById('mECategory').value,id]);
-    render();
+    cache.calendar=[];  // Clear cache to force fresh data
+    cache.tasks=[];  // Clear task cache too
+    await render();
   });
 }
 
@@ -665,7 +675,8 @@ function addPrompt(){showModal('Log Prompt',`
 `,async()=>{
   const id=uid();
   await neonQuery('INSERT INTO prompts(id,prompt,response,created) VALUES($1,$2,$3,$4)',[id,document.getElementById('mPrompt').value,document.getElementById('mResponse').value,Date.now()]);
-  render();
+  cache.prompts=[];  // Clear cache to force fresh data
+  await render();
 })}
 
 // ---- 4. DOCUMENTS ----
@@ -791,14 +802,28 @@ function showModal(title,body,onSave){
     ${onSave?'<button onclick="this.closest(\'.modal-overlay\')._save()">Save</button>':''}
     <button onclick="this.closest('.modal-overlay').remove()">Close</button>
   </div></div>`;
-  overlay._save=()=>{onSave();overlay.remove()};
+  overlay._save=async()=>{
+    try{
+      await onSave();
+      overlay.remove();
+    }catch(e){
+      console.error('Save error:',e);
+      alert('Error saving: '+e.message);
+    }
+  };
   document.body.appendChild(overlay);
 }
 
 async function deleteItem(key,id){
   const map={tasks:'tasks',calendar:'calendar_entries',prompts:'prompts',documents:'documents',content:'content_items'};
   await neonQuery(`DELETE FROM ${map[key]} WHERE id=$1`,[id]);
-  render();
+  // Clear relevant caches
+  cache[key]=[];
+  if(key==='tasks'||key==='calendar'){
+    cache.tasks=[];
+    cache.calendar=[];
+  }
+  await render();
   document.querySelectorAll('.modal-overlay').forEach(m=>m.remove());
 }
 
